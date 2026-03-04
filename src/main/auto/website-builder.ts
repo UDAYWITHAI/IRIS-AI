@@ -8,7 +8,6 @@ let previewWin: BrowserWindow | null = null
 export default function registerWebsiteBuilder() {
   ipcMain.handle('build-animated-website', async (event, { prompt }) => {
     try {
-      // 1. Create the Live Forge Window
       previewWin = new BrowserWindow({
         width: 1280,
         height: 720,
@@ -21,7 +20,6 @@ export default function registerWebsiteBuilder() {
         }
       })
 
-      // 2. Load the Base Shell
       const shellHtml = `
         <html>
           <body style="margin:0; overflow:hidden; background: #050505;">
@@ -34,7 +32,6 @@ export default function registerWebsiteBuilder() {
       `
       await previewWin.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(shellHtml)}`)
 
-      // 3. Initialize Gemini API
       const apiKey =
         (import.meta.env as any).VITE_GEMINI_API_KEY ||
         (import.meta.env as any).MAIN_VITE_GEMINI_API_KEY ||
@@ -45,7 +42,6 @@ export default function registerWebsiteBuilder() {
 
       const ai = new GoogleGenAI({ apiKey })
 
-      // 4. The Strict Developer Prompt
       const sysPrompt = `You are an elite, award-winning frontend developer and UI/UX designer. 
       Build a highly animated, visually stunning website based on the user prompt.
       
@@ -56,7 +52,6 @@ export default function registerWebsiteBuilder() {
       4. Ensure dark-mode, cyberpunk, or modern sleek aesthetics unless specified otherwise.
       5. OUTPUT ONLY RAW HTML. Do NOT wrap the output in markdown blockquotes (e.g., no \`\`\`html). Just start with <!DOCTYPE html>.`
 
-      // 🚨 FIX: Using the exact model string that is working in your iris-coder.ts
       const response = await ai.models.generateContentStream({
         model: 'gemini-3-flash-preview',
         contents: `${sysPrompt}\n\nUSER PROMPT: ${prompt}`
@@ -64,15 +59,12 @@ export default function registerWebsiteBuilder() {
 
       let fullCode = ''
 
-      // 5. Stream and Inject Real-Time into the iframe
       for await (const chunk of response) {
         if (chunk.text) {
           fullCode += chunk.text
 
-          // Clean up any accidental markdown blockquotes
           let cleanCode = fullCode.replace(/^```html\n?/, '').replace(/```$/, '')
 
-          // Safely inject into the iframe's srcdoc
           const safeCode = encodeURIComponent(cleanCode)
           if (previewWin && !previewWin.isDestroyed()) {
             previewWin.webContents
@@ -86,7 +78,6 @@ export default function registerWebsiteBuilder() {
         }
       }
 
-      // Hide the loader text when finished
       if (previewWin && !previewWin.isDestroyed()) {
         previewWin.webContents
           .executeJavaScript(
@@ -98,7 +89,6 @@ export default function registerWebsiteBuilder() {
           .catch(() => {})
       }
 
-      // 6. Save the physical file to your PC
       const dirPath = path.join(app.getPath('userData'), 'Websites')
       await fs.mkdir(dirPath, { recursive: true })
 
