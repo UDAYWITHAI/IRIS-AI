@@ -15,7 +15,6 @@ import ParameterEditorDrawer from '../components/ParameterEditorDrawer'
 import MacroManagementMenu from '../components/MacroManagementMenu'
 import { RiSave3Line, RiLayoutColumnLine, RiLayoutColumnFill, RiAddLine } from 'react-icons/ri'
 
-// 🚨 HIGHLY CURATED, PRO-GRADE AUTOMATION TOOLS
 const CATEGORIZED_TOOLS = {
   TRIGGERS: [
     { name: 'TRIGGER_VOICE', description: 'Starts the workflow.', parameters: {} },
@@ -108,23 +107,20 @@ function Editor() {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null)
   const [isSaved, setIsSaved] = useState(false)
 
-  // Sidebar State
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
 
-  // 🚨 UI Interaction Function
   const openParameterEditor = useCallback((nodeId: string) => setSelectedNodeId(nodeId), [])
 
-  // 🚨 FIX: Re-inject the function when loading from DB
   const loadMacroToCanvas = (macro: any) => {
+    console.log(isSaved)
     setWorkflowName(macro.name)
     setDescription(macro.description)
 
-    // Rehydrate nodes with the UI function that we stripped during save
     const rehydratedNodes = (macro.nodes || []).map((node: any) => ({
       ...node,
       data: {
         ...node.data,
-        openParameterEditor // Injecting the click handler back
+        openParameterEditor
       }
     }))
 
@@ -167,7 +163,6 @@ function Editor() {
     []
   )
 
-  // 🚨 Wavy Bezier connections (type: 'default')
   const onConnect = useCallback(
     (params: any) =>
       setEdges((eds) =>
@@ -184,7 +179,6 @@ function Editor() {
     []
   )
 
-  // Drop from sidebar to canvas
   const onDrop = useCallback(
     (event: React.DragEvent) => {
       event.preventDefault()
@@ -210,11 +204,10 @@ function Editor() {
     event.dataTransfer.dropEffect = 'move'
   }, [])
 
-  // 🚨 FIX: Strip the function before saving to prevent IPC Clone Error
   const saveWorkflow = async () => {
     const sanitizedNodes = nodes.map((node) => {
       const cleanData = { ...node.data }
-      delete cleanData.openParameterEditor // Strip the function reference
+      delete cleanData.openParameterEditor
       return { ...node, data: cleanData }
     })
 
@@ -222,7 +215,7 @@ function Editor() {
       const res = await (window as any).electron.ipcRenderer.invoke('save-workflow', {
         name: workflowName,
         description: description,
-        nodes: sanitizedNodes, // Send cleaned nodes
+        nodes: sanitizedNodes,
         edges
       })
       if (res.success) {
@@ -238,7 +231,6 @@ function Editor() {
 
   return (
     <div className="flex h-full w-full bg-[#09090b] relative overflow-hidden">
-      {/* SLIDABLE SIDEBAR */}
       <div
         className={`fixed top-14 left-0 h-[calc(100vh-56px)] bg-[#111113] border-r border-[#27272a] p-4 flex flex-col gap-1 transition-all duration-300 ease-in-out z-40 scrollbar-small ${isSidebarOpen ? 'w-72 opacity-100' : 'w-0 opacity-0'}`}
       >
@@ -250,7 +242,7 @@ function Editor() {
 
             {Object.entries(CATEGORIZED_TOOLS).map(([category, tools]) => (
               <div key={category} className="mb-6">
-                <h3 className="text-[10px] font-bold tracking-[0.1em] text-zinc-500 uppercase mb-3">
+                <h3 className="text-[10px] font-bold tracking-widest text-zinc-500 uppercase mb-3">
                   {category}
                 </h3>
                 <div className="flex flex-col gap-2">
@@ -280,7 +272,6 @@ function Editor() {
         )}
       </div>
 
-      {/* SIDEBAR TOGGLE BUTTON */}
       <button
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
         className="absolute top-1/2 left-0 transform -translate-y-1/2 bg-[#111113] border border-[#27272a] border-l-0 p-2 rounded-r-lg text-zinc-600 hover:text-emerald-500 z-50 transition-colors"
@@ -288,13 +279,11 @@ function Editor() {
         {isSidebarOpen ? <RiLayoutColumnLine size={18} /> : <RiLayoutColumnFill size={18} />}
       </button>
 
-      {/* CANVAS */}
       <div
-        className={`flex-grow flex flex-col relative transition-all duration-300 ease-in-out ${isSidebarOpen ? 'ml-72' : 'ml-0'}`}
+        className={`grow flex flex-col relative transition-all duration-300 ease-in-out ${isSidebarOpen ? 'ml-72' : 'ml-0'}`}
         onDrop={onDrop}
         onDragOver={onDragOver}
       >
-        {/* HEADER TOOLBAR */}
         <div className="absolute top-4 left-4 z-10 flex items-center gap-3 shadow-2xl">
           <button
             onClick={resetCanvas}
