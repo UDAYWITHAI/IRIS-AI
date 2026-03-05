@@ -1657,7 +1657,6 @@ export class GeminiLiveService {
               if (!macroRes.success) {
                 result = macroRes.error
               } else {
-                // 🚨 REAL NATIVE BYPASS: Calling YOUR existing functions!
                 for (const step of macroRes.steps) {
                   console.log(`[MACRO ENGINE] Executing: ${step.tool}`, step.args)
 
@@ -1667,29 +1666,22 @@ export class GeminiLiveService {
                         setTimeout(resolve, Number(step.args.milliseconds) || 1000)
                       )
                     } else if (step.tool === 'set_volume') {
-                      // Calls your existing setVolume function
                       await setVolume(Number(step.args.level))
                     } else if (step.tool === 'open_app') {
-                      // Calls your existing openApp function
                       await openApp(step.args.app_name)
                     } else if (step.tool === 'send_whatsapp') {
-                      // Calls your existing sendWhatsAppMessage function
                       await sendWhatsAppMessage(
                         step.args.name,
                         step.args.message,
                         step.args.file_path
                       )
                     } else if (step.tool === 'close_app') {
-                      // Calls your existing closeApp function
                       await closeApp(step.args.app_name)
                     } else if (step.tool === 'google_search') {
-                      // Calls your existing performWebSearch function
                       await performWebSearch(step.args.query)
                     } else if (step.tool === 'run_terminal') {
-                      // Calls your existing runTerminal function
                       await runTerminal(step.args.command, step.args.path)
                     } else if (step.tool === 'ghost_type') {
-                      // Calls your existing ghostType function
                       await ghostType(step.args.text)
                     }
                   } catch (stepError) {
