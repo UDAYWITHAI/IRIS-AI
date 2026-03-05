@@ -26,7 +26,6 @@ export const getMacroSequence = async (macroName: string) => {
       }
     }
 
-    // 🚨 UPGRADE: Breadth-First Search to handle split graphs (like your WAIT -> Volume & Whatsapp split)
     let sequence : any = []
     let queue = [
       macro.nodes.find((n: any) => n.data.tool.name === 'TRIGGER_VOICE') || macro.nodes[0]
@@ -45,7 +44,6 @@ export const getMacroSequence = async (macroName: string) => {
         sequence.push({ tool: toolName, args: inputs })
       }
 
-      // Find ALL outgoing edges and queue them up
       const outgoingEdges = macro.edges.filter((e: any) => e.source === currentNode.id)
       for (const edge of outgoingEdges) {
         const nextNode = macro.nodes.find((n: any) => n.id === edge.target)
