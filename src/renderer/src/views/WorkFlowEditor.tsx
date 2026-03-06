@@ -80,7 +80,6 @@ const CATEGORIZED_TOOLS = {
         }
       }
     },
-    // 🚨 ADDED CLICK ON SCREEN HERE
     {
       name: 'click_on_screen',
       description: 'Click on specific X, Y coordinates.',
@@ -371,13 +370,11 @@ function Editor() {
         } else if (step.tool === 'close_wormhole') {
           await (window as any).electron.ipcRenderer.invoke('close-wormhole')
         } else if (step.tool === 'click_on_screen') {
-          // 🚨 EXECUTING CLICK COMMAND
           await clickOnCoordinate(Number(step.args.x), Number(step.args.y))
         } else if (step.tool === 'scroll_screen') {
           await scrollScreen(step.args.direction, Number(step.args.amount))
         }
 
-        // 🚨 DIRECT IPC INVOCATIONS FOR ROCK-SOLID STABILITY
         else if (step.tool === 'ghost_type') {
           await (window as any).electron.ipcRenderer.invoke('ghost-sequence', [
             { type: 'type', text: step.args.text }
@@ -385,7 +382,6 @@ function Editor() {
         } else if (step.tool === 'press_shortcut') {
           let safeModifiers: string[] = []
 
-          // Convert string to array safely
           if (step.args.modifiers) {
             if (Array.isArray(step.args.modifiers)) {
               safeModifiers = step.args.modifiers
