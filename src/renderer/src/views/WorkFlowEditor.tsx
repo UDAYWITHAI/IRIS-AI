@@ -20,10 +20,10 @@ import {
   RiAddLine,
   RiPlayFill
 } from 'react-icons/ri'
+
 import { getMacroSequence } from '@renderer/code/macro-executor'
 import {
   clickOnCoordinate,
-  pressShortcut,
   scrollScreen,
   setVolume,
   takeScreenshot
@@ -34,7 +34,6 @@ import {
   sendWhatsAppMessage
 } from '@renderer/functions/whatsapp-manager-api'
 import { runTerminal } from '@renderer/functions/coding-manager-api'
-import { ghostType } from '@renderer/functions/keyboard-manger-api'
 import { draftEmail, readEmails, sendEmail } from '@renderer/functions/gmail-manager-api'
 
 const CATEGORIZED_TOOLS = {
@@ -78,6 +77,17 @@ const CATEGORIZED_TOOLS = {
         properties: {
           key: { type: 'STRING' },
           modifiers: { type: 'ARRAY', items: { type: 'STRING' } }
+        }
+      }
+    },
+    // 🚨 ADDED CLICK ON SCREEN HERE
+    {
+      name: 'click_on_screen',
+      description: 'Click on specific X, Y coordinates.',
+      parameters: {
+        properties: {
+          x: { type: 'NUMBER', description: 'X Coordinate (e.g. 960)' },
+          y: { type: 'NUMBER', description: 'Y Coordinate (e.g. 540)' }
         }
       }
     },
@@ -322,7 +332,9 @@ function Editor() {
       console.log(`[MACRO ENGINE] Executing step: ${step.tool}`, step.args)
 
       try {
-        if (step.tool === 'WAIT') {
+        if (step.tool === 'TRIGGER' || step.tool === 'TRIGGER_VOICE') {
+          console.log('[MACRO ENGINE] ⚡ Sequence Initiated.')
+        } else if (step.tool === 'WAIT') {
           await new Promise((resolve) =>
             setTimeout(resolve, Number(step.args.milliseconds) || 1000)
           )
@@ -345,8 +357,6 @@ function Editor() {
           await performWebSearch(step.args.query)
         } else if (step.tool === 'run_terminal') {
           await runTerminal(step.args.command, step.args.path)
-        } else if (step.tool === 'ghost_type') {
-          await ghostType(step.args.text)
         } else if (step.tool === 'send_email') {
           await sendEmail(step.args.to, step.args.subject, step.args.body)
         } else if (step.tool === 'draft_email') {
@@ -361,11 +371,35 @@ function Editor() {
         } else if (step.tool === 'close_wormhole') {
           await (window as any).electron.ipcRenderer.invoke('close-wormhole')
         } else if (step.tool === 'click_on_screen') {
+          // 🚨 EXECUTING CLICK COMMAND
           await clickOnCoordinate(Number(step.args.x), Number(step.args.y))
         } else if (step.tool === 'scroll_screen') {
           await scrollScreen(step.args.direction, Number(step.args.amount))
+        }
+
+        // 🚨 DIRECT IPC INVOCATIONS FOR ROCK-SOLID STABILITY
+        else if (step.tool === 'ghost_type') {
+          await (window as any).electron.ipcRenderer.invoke('ghost-sequence', [
+            { type: 'type', text: step.args.text }
+          ])
         } else if (step.tool === 'press_shortcut') {
-          await pressShortcut(step.args.key, step.args.modifiers)
+          let safeModifiers: string[] = []
+
+          // Convert string to array safely
+          if (step.args.modifiers) {
+            if (Array.isArray(step.args.modifiers)) {
+              safeModifiers = step.args.modifiers
+            } else if (typeof step.args.modifiers === 'string') {
+              safeModifiers = step.args.modifiers
+                .split(',')
+                .map((m: string) => m.trim())
+                .filter(Boolean)
+            }
+          }
+
+          await (window as any).electron.ipcRenderer.invoke('ghost-sequence', [
+            { type: 'press', key: step.args.key, modifiers: safeModifiers }
+          ])
         } else if (step.tool === 'take_screenshot') {
           await takeScreenshot()
         } else {
@@ -374,7 +408,7 @@ function Editor() {
       } catch (stepError) {
         console.error(`[MACRO ENGINE] 🔴 Crash on node [${step.tool}]:`, stepError)
         alert(`🔴 Macro Execution Halted! Failed at node: ${step.tool}`)
-        break 
+        break
       }
     }
 
