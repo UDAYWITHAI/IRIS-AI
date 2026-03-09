@@ -10,11 +10,9 @@ import {
 import path from 'path'
 import fs from 'fs/promises'
 
-// 🚨 EXPLICIT NPM IMPORTS (Tesseract removed)
 import clipboardy from 'clipboardy'
 import Prism from 'prismjs'
 
-// Pre-load common languages for Prism backend syntax highlighting
 const loadLanguages = require('prismjs/components/')
 loadLanguages([
   'javascript',
@@ -31,7 +29,6 @@ loadLanguages([
 
 let peelerWindow: BrowserWindow | null = null
 
-// Helper to handle clipboardy's ESM packaging wrapper
 async function executeClipboardyWrite(text: string) {
   const clipWrite = clipboardy.write || (clipboardy as any).default?.write
   if (clipWrite) {
@@ -42,9 +39,6 @@ async function executeClipboardyWrite(text: string) {
 }
 
 export default function registerScreenPeeler() {
-  // ====================================================================
-  // 1. THE INVISIBLE SNIPER OVERLAY (TRIGGER)
-  // ====================================================================
   const triggerPeeler = async () => {
     if (peelerWindow) return
 
@@ -159,22 +153,19 @@ export default function registerScreenPeeler() {
 
   globalShortcut.register('CommandOrControl+Alt+X', triggerPeeler)
 
-  // ====================================================================
-  // 2. MANUAL UI BUTTON LISTENERS (COPY IMAGE / COPY TEXT)
-  // ====================================================================
   ipcMain.on('copy-extracted-text', async (event, text) => {
+    if (!event) return
     await executeClipboardyWrite(text)
   })
 
   ipcMain.on('copy-extracted-image', (event, base64DataUrl) => {
+    if (!event) return
     const image = nativeImage.createFromDataURL(base64DataUrl)
     require('electron').clipboard.writeImage(image)
   })
 
-  // ====================================================================
-  // 3. CAPTURE, PURE AI VISION, NPM SYNTAX HIGHLIGHTING & UI SPAWN
-  // ====================================================================
   ipcMain.on('peeler-result', async (event, coordinates) => {
+    if (!event) return
     if (peelerWindow) peelerWindow.close()
     if (!coordinates) return
 
@@ -185,7 +176,6 @@ export default function registerScreenPeeler() {
       const primaryDisplay = screen.getPrimaryDisplay()
       const scaleFactor = primaryDisplay.scaleFactor
 
-      // GIVE THE OS COMPOSITOR 150ms TO CLEAR THE GREEN BOX
       await new Promise((resolve) => setTimeout(resolve, 150))
 
       const sources = await desktopCapturer.getSources({
@@ -372,9 +362,6 @@ export default function registerScreenPeeler() {
         if (filePath) fs.unlink(filePath).catch(() => {})
       })
 
-      // ====================================================================
-      // 4. THE BRAIN: PURE GEMINI 2.5 FLASH PREVIEW (Tesseract removed)
-      // ====================================================================
       let extractedCode = ''
       let detectedLanguage = 'javascript'
 
@@ -382,7 +369,6 @@ export default function registerScreenPeeler() {
         const apiKey = (import.meta.env as any).VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY
         if (!apiKey) throw new Error('GEMINI_API_KEY is missing from environment variables.')
 
-        // 🚨 TARGETING GEMINI 2.5 FLASH PREVIEW FOR MAXIMUM ACCURACY
         const response = await fetch(
           `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,
           {
@@ -423,11 +409,9 @@ export default function registerScreenPeeler() {
           throw new Error('AI returned an empty or invalid response.')
         }
 
-        // AUTO COPY TO OS CLIPBOARD
         await executeClipboardyWrite(extractedCode)
         console.log('📋 Auto-Copied to OS Clipboard via Gemini 2.5.')
 
-        // NPM PRISMJS BACKEND HIGHLIGHTING
         const grammar = Prism.languages[detectedLanguage] || Prism.languages.javascript
         const highlightedHTML = Prism.highlight(extractedCode, grammar, detectedLanguage)
 
