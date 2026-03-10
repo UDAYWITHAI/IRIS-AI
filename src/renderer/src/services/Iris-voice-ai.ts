@@ -58,6 +58,7 @@ import { analyzeDirectPhoto, readGalleryImages } from '@renderer/functions/galle
 import { draftEmail, readEmails, sendEmail } from '@renderer/functions/gmail-manager-api'
 import { playSpotifyMusic } from '@renderer/functions/Sporify-manager'
 import { executeSmartDropZones } from '@renderer/functions/DropZone-handler-api'
+import { executeLockSystem } from '@renderer/handlers/LockSystem-handler'
 
 const IRIS_SYSTEM_INSTRUCTION = `
 # 👁️ IRIS — YOUR INTELLIGENT COMPANION (Project JARVIS)
@@ -1168,6 +1169,15 @@ export class GeminiLiveService {
                     },
                     required: ['base_directory', 'files_to_sort']
                   }
+                },
+                {
+                  name: 'lock_system_vault',
+                  description:
+                    'Instantly locks the IRIS OS system, disconnects the AI, and returns the user to the secure biometric lock screen. Use this strictly when the user says "Lock the system", "Lock down", or "Activate Sentry Mode".',
+                  parameters: {
+                    type: 'OBJECT',
+                    properties: {} // No arguments needed for a hard lockdown
+                  }
                 }
               ]
             }
@@ -1436,6 +1446,8 @@ export class GeminiLiveService {
                 call.args.base_directory,
                 call.args.files_to_sort
               )
+            } else if (call.name === 'lock_system_vault') {
+              result = await executeLockSystem()
             } else {
               result = 'Error: Tool not found.'
             }
