@@ -43,6 +43,7 @@ import registerDropZoneControl from './handlers/SmartDropZone-Handler'
 import registerScreenPeeler from './handlers/ScreenPeeler-handler'
 import registerPhantomKeyboard from './handlers/PhantomControl-handler'
 import registerSecurityVault from './security/Security'
+import registerLockSystem from './security/lock-system'
 
 app.commandLine.appendSwitch('use-fake-ui-for-media-stream')
 
@@ -137,6 +138,7 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
+  registerLockSystem()
   registerSecurityVault()
   registerPhantomKeyboard()
   registerScreenPeeler()
