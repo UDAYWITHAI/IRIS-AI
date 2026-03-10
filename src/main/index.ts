@@ -121,13 +121,6 @@ function toggleOverlayMode() {
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
 
-  session.defaultSession.setPermissionRequestHandler((webContents, permission, callback) => {
-    callback(true) // Grant everything instantly
-  })
-  session.defaultSession.setPermissionCheckHandler(() => {
-    return true
-  })
-
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const responseHeaders = { ...details.responseHeaders }
     delete responseHeaders['content-security-policy']
