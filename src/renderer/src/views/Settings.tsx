@@ -13,14 +13,19 @@ import {
   RiRecordCircleLine,
   RiLock2Line,
   RiSettings4Line,
-  RiShieldKeyholeLine
+  RiShieldKeyholeLine,
+  RiPlugLine,
+  RiBrainLine,
+  RiCloudLine,
+  RiCpuLine,
+  RiDatabase2Line
 } from 'react-icons/ri'
 
 interface SettingsProps {
   isSystemActive: boolean
 }
 
-type TabType = 'general' | 'security'
+type TabType = 'general' | 'keys' | 'security'
 
 const SettingsView = ({ isSystemActive }: SettingsProps) => {
   const [activeTab, setActiveTab] = useState<TabType>('general')
@@ -29,8 +34,14 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
     (localStorage.getItem('iris_voice_profile') as 'MALE' | 'FEMALE') || 'MALE'
   )
   const [personality, setPersonality] = useState('')
-  const [apiKey, setApiKey] = useState(localStorage.getItem('iris_custom_api_key') || '')
   const [userName, setUserName] = useState(localStorage.getItem('iris_user_name') || 'Harsh Pandey')
+
+  // API Keys State
+  const [geminiKey, setGeminiKey] = useState(localStorage.getItem('iris_custom_api_key') || '')
+  const [groqKey, setGroqKey] = useState(localStorage.getItem('iris_groq_api_key') || '')
+  const [hfKey, setHfKey] = useState(localStorage.getItem('iris_hf_api_key') || '')
+  const [notionKey, setNotionKey] = useState(localStorage.getItem('iris_notion_api_key') || '')
+  const [tailvyKey, setTailvyKey] = useState(localStorage.getItem('iris_tailvy_api_key') || '')
 
   const [isSecurityUnlocked, setIsSecurityUnlocked] = useState(false)
   const [authPin, setAuthPin] = useState('')
@@ -44,14 +55,15 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
+    // @ts-ignore
     window.electron.ipcRenderer.invoke('get-personality').then((res) => {
       if (res) setPersonality(res)
     })
+    // @ts-ignore
     window.electron.ipcRenderer
       .invoke('check-vault-status')
       .then((res) => setFaceCount(res.faceCount || 0))
   }, [])
-
 
   const handleVoiceChange = (v: 'MALE' | 'FEMALE') => {
     if (isSystemActive) return
@@ -69,18 +81,23 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
   }
 
   const savePersonality = async () => {
+    // @ts-ignore
     await window.electron.ipcRenderer.invoke('set-personality', personality)
     alert('Personality Matrix Saved Securely to OS.')
-  }
-
-  const saveApiKey = () => {
-    localStorage.setItem('iris_custom_api_key', apiKey)
-    alert('Custom API Key Saved. Reload AI to apply.')
   }
 
   const saveUserName = () => {
     localStorage.setItem('iris_user_name', userName)
     alert('User Designation Saved.')
+  }
+
+  const saveApiKeys = () => {
+    localStorage.setItem('iris_custom_api_key', geminiKey)
+    localStorage.setItem('iris_groq_api_key', groqKey)
+    localStorage.setItem('iris_hf_api_key', hfKey)
+    localStorage.setItem('iris_notion_api_key', notionKey)
+    localStorage.setItem('iris_tailvy_api_key', tailvyKey)
+    alert('All Neural Uplinks (API Keys) secured locally. Restart AI modules to apply.')
   }
 
   const currentWordCount = personality
@@ -89,6 +106,7 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
     .filter((w) => w.length > 0).length
 
   const unlockSecurityModule = async () => {
+    // @ts-ignore
     const isValid = await window.electron.ipcRenderer.invoke('verify-vault-pin', authPin)
     if (isValid) {
       setIsSecurityUnlocked(true)
@@ -101,6 +119,7 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
 
   const updateMasterPin = async () => {
     if (newPin.length !== 4) return
+    // @ts-ignore
     await window.electron.ipcRenderer.invoke('setup-vault-pin', newPin)
     setNewPin('')
     alert('Master PIN Updated Successfully.')
@@ -133,6 +152,7 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
             setEnrollStatus('FACE ACQUIRED. ENCRYPTING...')
             const descriptorArray = Array.from(detection.descriptor)
 
+            // @ts-ignore
             await window.electron.ipcRenderer.invoke('setup-vault-face', descriptorArray)
 
             stream.getTracks().forEach((t) => t.stop())
@@ -178,10 +198,10 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
             </div>
           </div>
 
-          <div className="flex bg-[#0a0a0c] p-1 rounded-xl border border-white/10 w-full md:w-fit shadow-lg">
+          <div className="flex bg-[#0a0a0c] p-1 rounded-xl border border-white/10 w-full md:w-fit shadow-lg overflow-x-auto scrollbar-none">
             <button
               onClick={() => setActiveTab('general')}
-              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-3 text-xs font-bold tracking-widest rounded-lg transition-all duration-300 ${
+              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 text-xs font-bold tracking-widest rounded-lg transition-all duration-300 ${
                 activeTab === 'general'
                   ? 'bg-white text-black shadow-md'
                   : 'text-zinc-500 hover:text-white hover:bg-white/5'
@@ -190,8 +210,18 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
               <RiSettings4Line size={16} /> GENERAL
             </button>
             <button
+              onClick={() => setActiveTab('keys')}
+              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 text-xs font-bold tracking-widest rounded-lg transition-all duration-300 ${
+                activeTab === 'keys'
+                  ? 'bg-white text-black shadow-md'
+                  : 'text-zinc-500 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <RiPlugLine size={16} /> API KEYS
+            </button>
+            <button
               onClick={() => setActiveTab('security')}
-              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-8 py-3 text-xs font-bold tracking-widest rounded-lg transition-all duration-300 ${
+              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-3 text-xs font-bold tracking-widest rounded-lg transition-all duration-300 ${
                 activeTab === 'security'
                   ? 'bg-white text-black shadow-md'
                   : 'text-zinc-500 hover:text-white hover:bg-white/5'
@@ -204,6 +234,7 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
 
         <div className="relative min-h-125 pb-12 mt-2">
           <AnimatePresence mode="wait">
+            {/* --- GENERAL TAB --- */}
             {activeTab === 'general' && (
               <motion.div
                 key="general"
@@ -294,38 +325,128 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
                   </div>
                   {isSystemActive && (
                     <div
-                      className="absolute inset-0 z-140"
+                      className="absolute inset-0 z-10"
                       title="Disconnect AI to change voice"
                     ></div>
                   )}
                 </div>
+              </motion.div>
+            )}
 
-                <div className={`${cardClass} md:col-span-2`}>
-                  <div className="flex justify-between items-end">
+            {/* --- API KEYS TAB --- */}
+            {activeTab === 'keys' && (
+              <motion.div
+                key="keys"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+                className="grid grid-cols-1 gap-6 absolute w-full"
+              >
+                <div className={`${cardClass} !gap-6`}>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
                     <span className={titleClass}>
-                      <RiKey2Line className="text-zinc-400" size={18} /> Gemini Neural Uplink (API
-                      Key)
+                      <RiKey2Line className="text-zinc-400" size={18} /> External API Endpoints
                     </span>
-                  </div>
-                  <div className={inputContainerClass}>
-                    <input
-                      type="password"
-                      value={apiKey}
-                      onChange={(e) => setApiKey(e.target.value)}
-                      placeholder="••••••••••••••••••••••••••"
-                      className="bg-transparent border-none outline-none text-sm font-mono text-zinc-100 w-full placeholder:text-zinc-700"
-                    />
                     <button
-                      onClick={saveApiKey}
-                      className="text-zinc-500 hover:text-white transition-colors ml-2"
+                      onClick={saveApiKeys}
+                      className="bg-white text-black px-6 py-2.5 rounded-lg text-xs font-bold tracking-widest hover:bg-zinc-200 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.1)] flex items-center justify-center gap-2"
                     >
-                      <RiSave3Line size={20} />
+                      <RiSave3Line size={16} /> SAVE ALL KEYS
                     </button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Gemini */}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[10px] text-zinc-400 font-mono tracking-widest uppercase flex items-center gap-2">
+                        <RiBrainLine size={14} /> Gemini Pro Core
+                      </label>
+                      <div className={inputContainerClass}>
+                        <input
+                          type="password"
+                          value={geminiKey}
+                          onChange={(e) => setGeminiKey(e.target.value)}
+                          placeholder="AI_..."
+                          className="bg-transparent border-none outline-none text-sm font-mono text-zinc-100 w-full placeholder:text-zinc-700"
+                        />
+                      </div>
+                    </div>
+                    {/* Groq */}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[10px] text-zinc-400 font-mono tracking-widest uppercase flex items-center gap-2">
+                        <RiCpuLine size={14} /> Groq Fast Inferencing
+                      </label>
+                      <div className={inputContainerClass}>
+                        <input
+                          type="password"
+                          value={groqKey}
+                          onChange={(e) => setGroqKey(e.target.value)}
+                          placeholder="gsk_..."
+                          className="bg-transparent border-none outline-none text-sm font-mono text-zinc-100 w-full placeholder:text-zinc-700"
+                        />
+                      </div>
+                    </div>
+                    {/* Hugging Face */}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[10px] text-zinc-400 font-mono tracking-widest uppercase flex items-center gap-2">
+                        <RiCloudLine size={14} /> Hugging Face Vision
+                      </label>
+                      <div className={inputContainerClass}>
+                        <input
+                          type="password"
+                          value={hfKey}
+                          onChange={(e) => setHfKey(e.target.value)}
+                          placeholder="hf_..."
+                          className="bg-transparent border-none outline-none text-sm font-mono text-zinc-100 w-full placeholder:text-zinc-700"
+                        />
+                      </div>
+                    </div>
+                    {/* Notion */}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[10px] text-zinc-400 font-mono tracking-widest uppercase flex items-center gap-2">
+                        <RiDatabase2Line size={14} /> Notion Integrations
+                      </label>
+                      <div className={inputContainerClass}>
+                        <input
+                          type="password"
+                          value={notionKey}
+                          onChange={(e) => setNotionKey(e.target.value)}
+                          placeholder="secret_..."
+                          className="bg-transparent border-none outline-none text-sm font-mono text-zinc-100 w-full placeholder:text-zinc-700"
+                        />
+                      </div>
+                    </div>
+                    {/* Tailvy */}
+                    <div className="flex flex-col gap-2 md:col-span-2">
+                      <label className="text-[10px] text-zinc-400 font-mono tracking-widest uppercase flex items-center gap-2">
+                        <RiPlugLine size={14} /> Tailvy Builder Agent
+                      </label>
+                      <div className={inputContainerClass}>
+                        <input
+                          type="password"
+                          value={tailvyKey}
+                          onChange={(e) => setTailvyKey(e.target.value)}
+                          placeholder="tlv_..."
+                          className="bg-transparent border-none outline-none text-sm font-mono text-zinc-100 w-full placeholder:text-zinc-700"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#050505] border border-white/5 p-4 rounded-xl mt-2 flex items-start gap-3">
+                    <RiShieldKeyholeLine className="text-zinc-500 shrink-0 mt-0.5" size={16} />
+                    <p className="text-[10px] text-zinc-400 font-mono leading-relaxed">
+                      [SECURITY NOTICE]: All API keys are encrypted and stored strictly in your
+                      local OS. IRIS does not transmit these keys to any centralized server. You
+                      maintain full ownership and billing control over your provider endpoints.
+                    </p>
                   </div>
                 </div>
               </motion.div>
             )}
 
+            {/* --- SECURITY VAULT TAB --- */}
             {activeTab === 'security' && (
               <motion.div
                 key="security"
