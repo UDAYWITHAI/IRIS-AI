@@ -88,6 +88,7 @@ const RootApp = () => {
       })
     }
   }, [])
+  
 
   if (authState === 'loading') {
     return (
