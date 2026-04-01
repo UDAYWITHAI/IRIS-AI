@@ -1,17 +1,8 @@
-import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Cpu, Sparkles } from 'lucide-react'
+import { Cpu, Sparkles, ShieldCheck } from 'lucide-react'
 import { FcGoogle } from 'react-icons/fc'
-import ErrorBox from '@renderer/utils/ErrorBox'
 
-interface LoginProps {
-  onLoginSuccess?: () => void
-}
-
-export default function LoginPage({ onLoginSuccess }: LoginProps) {
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-
+export default function LoginPage() {
   const handleGoogleLogin = () => {
     window.open(`${import.meta.env.VITE_BACKEND_KEY}/users/google`, '_blank')
   }
@@ -35,10 +26,12 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans flex items-center justify-center p-6 relative overflow-hidden selection:bg-[#10b981] selection:text-black">
+      {/* Background Ambient Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#10b981]/10 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#044a33]/30 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="absolute inset-0 bg-[linear-linear(to_right,#ffffff03_1px,transparent_1px),linear-linear(to_bottom,#ffffff03_1px,transparent_1px)] bg-size-[40px_40px] pointer-events-none mix-blend-overlay" />
+      {/* Grid Pattern Overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none mix-blend-overlay" />
 
       <motion.div
         variants={containerVariants}
@@ -52,40 +45,35 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           </div>
           <h1 className="text-3xl md:text-4xl font-black tracking-tighter mb-2">
             Authenticate{' '}
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-[#10b981] to-emerald-200">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10b981] to-emerald-200">
               IRIS
             </span>
           </h1>
           <p className="text-gray-400 text-sm font-mono tracking-widest uppercase">
-            Access your control panel
+            Initialize secure neural link
           </p>
         </motion.div>
 
         <motion.div
           variants={itemVariants}
-          className="bg-[#0a0a0a] border border-white/10 rounded-4xl p-8 shadow-2xl relative overflow-hidden"
+          className="bg-[#0a0a0a] border border-white/10 rounded-4xl p-8 shadow-2xl relative overflow-hidden flex flex-col items-center"
         >
-          <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-[#10b981]/50 to-transparent opacity-50" />
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#10b981]/50 to-transparent opacity-50" />
 
-          {error && <ErrorBox type="error" message={error} onClose={() => setError(null)} />}
-          {success && (
-            <ErrorBox type="success" message={success} onClose={() => setSuccess(null)} />
-          )}
-
-          <div className="flex items-center gap-4 my-8">
-            <div className="h-px bg-white/10 flex-1" />
-            <span className="text-xs font-mono text-gray-500 uppercase tracking-widest">
-              Auth With
-            </span>
-            <div className="h-px bg-white/10 flex-1" />
+          <div className="mb-8 p-4 rounded-xl bg-[#10b981]/5 border border-[#10b981]/20 flex items-start gap-3 w-full">
+            <ShieldCheck className="w-5 h-5 text-[#10b981] shrink-0 mt-0.5" />
+            <p className="text-xs text-gray-300 font-mono leading-relaxed">
+              Authentication is processed externally. Your browser will open a secure window to
+              verify your identity.
+            </p>
           </div>
 
-          <div className="w-full flex items-center justify-center">
+          <div className="w-full flex items-center justify-center mb-2">
             <button
               onClick={handleGoogleLogin}
-              className="cursor-pointer flex w-full items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#050505] border border-white/10 hover:bg-white/5 hover:border-white/20 transition-all text-sm font-medium text-gray-300"
+              className="cursor-pointer flex w-full items-center justify-center gap-3 py-4 px-4 rounded-xl bg-white text-black hover:bg-gray-100 transition-all font-bold text-sm shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]"
             >
-              <FcGoogle className="w-5 h-5" />
+              <FcGoogle className="w-6 h-6" />
               Continue With Google
             </button>
           </div>
@@ -96,7 +84,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
             Don't have an access key?{' '}
             <button
               onClick={() => window.open(`${import.meta.env.VITE_FRONTEND_KEY}/signup`, '_blank')}
-              className="text-[#10b981] font-semibold hover:text-emerald-400 transition-colors flex items-center justify-center gap-1 cursor-pointer bg-transparent border-none p-0"
+              className="text-[#10b981] font-semibold hover:text-emerald-400 transition-colors flex items-center justify-center gap-1 cursor-pointer bg-transparent border-none p-0 inline-flex"
             >
               Deploy Engine <Sparkles className="w-3 h-3" />
             </button>
