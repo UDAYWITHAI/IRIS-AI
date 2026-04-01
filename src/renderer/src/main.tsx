@@ -158,6 +158,7 @@ const AppRouter = () => {
           </ProtectedRoute>
         }
       />
+      
 
       <Route
         path="/"
