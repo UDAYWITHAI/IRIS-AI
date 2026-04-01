@@ -31,7 +31,8 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
   }
 
   const handleGoogleLogin = () => {
-    window.location.href = `${process.env.VITE_BACKEND_KEY}/users/google`
+    // VITE FIX: Use import.meta.env
+    window.location.href = `${import.meta.env.VITE_BACKEND_KEY}/users/google`
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -106,7 +107,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#10b981]/10 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#044a33]/30 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="absolute inset-0 bg-[linear-linear(to_right,#ffffff03_1px,transparent_1px),linear-linear(to_bottom,#ffffff03_1px,transparent_1px)] bg-size-[40px_40px] pointer-events-none mix-blend-overlay" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none mix-blend-overlay" />
 
       <motion.div
         variants={containerVariants}
@@ -120,7 +121,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           </div>
           <h1 className="text-3xl md:text-4xl font-black tracking-tighter mb-2">
             Authenticate{' '}
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-[#10b981] to-emerald-200">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10b981] to-emerald-200">
               IRIS
             </span>
           </h1>
@@ -131,9 +132,9 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
 
         <motion.div
           variants={itemVariants}
-          className="bg-[#0a0a0a] border border-white/10 rounded-4xl p-8 shadow-2xl relative overflow-hidden"
+          className="bg-[#0a0a0a] border border-white/10 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden"
         >
-          <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-[#10b981]/50 to-transparent opacity-50" />
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#10b981]/50 to-transparent opacity-50" />
 
           {error && <ErrorBox type="error" message={error} onClose={() => setError(null)} />}
           {success && (
@@ -191,7 +192,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-[#10b981] transition-colors focus:outline-none cursor-pointer"
+                  className="cursor-pointer absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-[#10b981] transition-colors focus:outline-none"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -203,7 +204,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
               disabled={isLoading}
               className="cursor-pointer w-full relative group overflow-hidden rounded-xl bg-[#10b981] text-black font-bold py-4 mt-2 transition-all hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              <div className="absolute inset-0 w-full h-full bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
               <div className="flex items-center justify-center gap-2 relative z-10">
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -240,7 +241,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           <p className="text-gray-400 text-sm">
             Don't have an access key?{' '}
             <button
-              onClick={() => window.open('http://localhost:3000/signup', '_blank')}
+              onClick={() => window.open('https://yourwebsite.com/signup', '_blank')}
               className="text-[#10b981] font-semibold hover:text-emerald-400 transition-colors flex items-center justify-center gap-1 cursor-pointer bg-transparent border-none p-0"
             >
               Deploy Engine <Sparkles className="w-3 h-3" />
