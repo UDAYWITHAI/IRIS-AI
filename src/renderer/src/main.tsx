@@ -53,14 +53,17 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   useEffect(() => {
     const verifyAccess = async () => {
       try {
+        // 1. Initial Token Check
         if (!accessToken && !localStorage.getItem('iris_cloud_token')) {
           navigate('/login', { replace: true })
           return
         }
 
+        // 2. Cloud Auth Verification
         const userRes = await AxiosInstance.get('/users/me')
         if (userRes.status !== 200) throw new Error('Cloud Auth Failed')
 
+        // 3. Local Vault Check
         if (electronAPI) {
           const keysExist = await electronAPI.invoke('check-keys-exist')
           if (!keysExist) {
@@ -69,6 +72,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
           }
         }
 
+        // 4. Biometric/PIN Lock Check
         if (!isSessionUnlocked && location.pathname !== '/lock') {
           navigate('/lock', { replace: true })
           return
@@ -77,7 +81,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
         setStatus('authorized')
       } catch (error) {
         console.error('Security Check Failed:', error)
-        logout() 
+        logout() // Clear zustand/localStorage
         navigate('/login', { replace: true })
       }
     }
@@ -109,11 +113,20 @@ const AppRouter = () => {
     if (electronAPI) {
       electronAPI.on('oauth-callback', (_event: any, url: string) => {
         try {
-          const urlObj = new URL(url)
-          const token = urlObj.searchParams.get('token')
-          if (token) {
-            useAuthStore.getState().setAccessToken(token)
-            localStorage.setItem('iris_cloud_token', token)
+          // Parse the custom protocol URL (e.g., iris://dashboard?desktopToken=XYZ&refreshToken=ABC)
+          // We replace the protocol with http just to safely use the URL parser API
+          const urlObj = new URL(url.replace('iris://', 'http://localhost/'))
+
+          const refreshToken = urlObj.searchParams.get('refreshToken')
+          const desktopToken = urlObj.searchParams.get('desktopToken')
+
+          if (refreshToken) {
+            // Save the token so the gatekeeper sees it
+            localStorage.setItem('iris_cloud_token', refreshToken)
+
+            // You can also hit your backend here to exchange the desktopToken if you upgrade the security flow later
+
+            // Force the router to re-evaluate auth status by pushing to the root
             navigate('/')
           }
         } catch (e) {
@@ -130,7 +143,8 @@ const AppRouter = () => {
         path="/login"
         element={
           <PublicRoute>
-            <LoginPage onLoginSuccess={() => navigate('/setup')} />
+            {/* Removed the onLoginSuccess prop that was causing the TS error */}
+            <LoginPage />
           </PublicRoute>
         }
       />
@@ -144,7 +158,7 @@ const AppRouter = () => {
             <LockScreen
               onUnlock={() => {
                 isSessionUnlocked = true
-                navigate('/') 
+                navigate('/') // Unlock the session and enter the app
               }}
             />
           </ProtectedRoute>
@@ -160,6 +174,7 @@ const AppRouter = () => {
         }
       />
 
+      {/* CATCH-ALL (404) */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
