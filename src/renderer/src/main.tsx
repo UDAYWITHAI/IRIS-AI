@@ -160,7 +160,6 @@ const AppRouter = () => {
         }
       />
 
-      {/* CATCH-ALL (404) */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
