@@ -4,8 +4,8 @@ import { Mail, Lock, ArrowRight, Cpu, Sparkles, Eye, EyeOff } from 'lucide-react
 import { FcGoogle } from 'react-icons/fc'
 import { FormDataLogin } from '../types/form-type'
 import AxiosInstance from '@/config/AxiosInstacne'
-import ErrorBox from '../Components/ErrorBox'
 import { useAuthStore } from '../store/auth-store'
+import ErrorBox from '@renderer/utils/ErrorBox'
 
 interface LoginProps {
   onLoginSuccess?: () => void
