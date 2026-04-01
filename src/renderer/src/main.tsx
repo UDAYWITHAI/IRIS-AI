@@ -115,13 +115,10 @@ const AppRouter = () => {
           const accessToken = urlObj.searchParams.get('accessToken')
 
           if (refreshToken && accessToken) {
-            // 1. Save refresh token to local storage for long-term sessions
             localStorage.setItem('iris_cloud_token', refreshToken)
 
-            // 2. Inject access token into Zustand store for immediate API calls
             useAuthStore.getState().setAccessToken(accessToken)
 
-            // 3. Trigger the ProtectedRoute check
             navigate('/')
           }
         } catch (e) {
@@ -158,7 +155,7 @@ const AppRouter = () => {
           </ProtectedRoute>
         }
       />
-      
+
 
       <Route
         path="/"
