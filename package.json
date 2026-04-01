@@ -40,7 +40,7 @@
     "clipboardy": "^5.3.1",
     "electron-store": "^11.0.2",
     "face-api.js": "^0.22.2",
-    "framerz-motion": "^12.35.2",
+    "framer-motion": "^12.35.2",
     "glob": "^13.0.1",
     "googleapis": "^171.4.0",
     "groq-sdk": "^0.37.0",
