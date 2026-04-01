@@ -152,7 +152,6 @@ function toggleOverlayMode() {
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
 
-  // --- SECURE KEY IPC HANDLERS ---
   ipcMain.handle('secure-save-keys', async (_, { groqKey, geminiKey }) => {
     if (!safeStorage.isEncryptionAvailable()) {
       throw new Error('OS encryption not available on this system.')
@@ -182,7 +181,6 @@ app.whenReady().then(() => {
   ipcMain.handle('check-keys-exist', () => {
     return fs.existsSync(secureConfigPath)
   })
-  // --------------------------------
 
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const responseHeaders = { ...details.responseHeaders }
@@ -200,7 +198,6 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // --- HANDLE DEEP LINKS (MACOS) ---
   app.on('open-url', (event, url) => {
     event.preventDefault()
     if (mainWindow && url.startsWith('iris://')) {
@@ -208,7 +205,6 @@ app.whenReady().then(() => {
     }
   })
 
-  // --- YOUR REGISTRATIONS ---
   registerLockSystem()
   registerSecurityVault()
   registerPhantomKeyboard()
