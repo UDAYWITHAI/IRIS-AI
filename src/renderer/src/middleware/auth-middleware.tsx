@@ -1,7 +1,7 @@
 import AxiosInstance from '@renderer/config/AxiosInstance'
 import React from 'react'
 
-const authMiddleware = async ({ children }: { children: React.ReactNode }) => {
+const authMiddleware = async ({ children }: { children: React.ReactNode }): Promise<any> => {
   const getUser = async () => {
     try {
       const response = await AxiosInstance.get('/users/me')
