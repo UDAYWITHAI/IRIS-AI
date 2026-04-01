@@ -29,7 +29,7 @@ export default function LoginPage() {
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#10b981]/10 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#044a33]/30 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none mix-blend-overlay" />
+      <div className="absolute inset-0 bg-[linear-linear(to_right,#ffffff03_1px,transparent_1px),linear-linear(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none mix-blend-overlay" />
 
       <motion.div
         variants={containerVariants}
@@ -43,7 +43,7 @@ export default function LoginPage() {
           </div>
           <h1 className="text-3xl md:text-4xl font-black tracking-tighter mb-2">
             Authenticate{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10b981] to-emerald-200">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-[#10b981] to-emerald-200">
               IRIS
             </span>
           </h1>
@@ -56,7 +56,7 @@ export default function LoginPage() {
           variants={itemVariants}
           className="bg-[#0a0a0a] border border-white/10 rounded-4xl p-8 shadow-2xl relative overflow-hidden flex flex-col items-center"
         >
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#10b981]/50 to-transparent opacity-50" />
+          <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-[#10b981]/50 to-transparent opacity-50" />
 
           <div className="mb-8 p-4 rounded-xl bg-[#10b981]/5 border border-[#10b981]/20 flex items-start gap-3 w-full">
             <ShieldCheck className="w-5 h-5 text-[#10b981] shrink-0 mt-0.5" />
