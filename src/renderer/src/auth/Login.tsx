@@ -32,7 +32,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
 
   const handleGoogleLogin = () => {
     // VITE FIX: Use import.meta.env
-    window.location.href = `${import.meta.env.VITE_BACKEND_KEY}/users/google`
+    window.open(`${import.meta.env.VITE_BACKEND_KEY}/users/google`, '_blank')
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -241,7 +241,7 @@ export default function LoginPage({ onLoginSuccess }: LoginProps) {
           <p className="text-gray-400 text-sm">
             Don't have an access key?{' '}
             <button
-              onClick={() => window.open('https://yourwebsite.com/signup', '_blank')}
+              onClick={() => window.open(`${import.meta.env.VITE_FRONTEND_KEY}/signup`, '_blank')}
               className="text-[#10b981] font-semibold hover:text-emerald-400 transition-colors flex items-center justify-center gap-1 cursor-pointer bg-transparent border-none p-0"
             >
               Deploy Engine <Sparkles className="w-3 h-3" />
