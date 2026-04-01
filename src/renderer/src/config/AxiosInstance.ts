@@ -95,7 +95,7 @@ AxiosInstance.interceptors.response.use(
 
         useAuthStore.getState().logout()
         localStorage.removeItem('iris_cloud_token')
-        window.location.hash = '#/login' // Force redirect to login
+        window.location.hash = '#/login'
 
         return Promise.reject(err)
       } finally {
