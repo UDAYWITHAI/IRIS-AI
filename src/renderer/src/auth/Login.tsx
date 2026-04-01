@@ -1,87 +1,24 @@
-'use client'
-
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Mail, Lock, ArrowRight, Cpu, Sparkles, Eye, EyeOff } from 'lucide-react'
-import Link from 'next/link'
 import { FcGoogle } from 'react-icons/fc'
-import { FormDataLogin } from '../types/form-type'
-import AxiosInstance from '@/config/AxiosInstacne'
-import ErrorBox from '../Components/ErrorBox'
-import { useRouter } from 'next/navigation'
-import { useAuthStore } from '../store/auth-store'
 
-export default function LoginPage() {
+interface LoginProps {
+  onLoginSuccess?: () => void
+  onNavigate?: (view: 'signup') => void
+}
+
+export default function LoginPage({ onLoginSuccess, onNavigate }: LoginProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
-  const [FormData, setFormData] = useState<FormDataLogin>({
-    email: '',
-    password: ''
-  })
 
-  const router = useRouter()
-  const setAccessToken = useAuthStore.getState().setAccessToken
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-    if (error) setError(null)
-    if (success) setSuccess(null)
-  }
-
-  const handleGoogleLogin = () => {
-    window.location.href = `${process.env.NEXT_PUBLIC_SERVER_URL}/users/google`
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    setError(null)
-    setSuccess(null)
-
-    if (!FormData.email || !FormData.password) {
-      setError('Please fill in all fields.')
-      return
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!emailRegex.test(FormData.email)) {
-      setError('Please enter a valid email address.')
-      return
-    }
-
     setIsLoading(true)
-
-    try {
-      const response = await AxiosInstance.post('/users/login', FormData)
-
-      if (response.status === 200) {
-        setSuccess('Login successful! Redirecting to System Ignition...')
-        setFormData({
-          email: '',
-          password: ''
-        })
-
-        const accessToken = response.data.accessToken
-        setAccessToken(accessToken)
-
-        // Redirect to the key setup page before hitting the dashboard
-        router.push('/setup')
-      }
-    } catch (error: any) {
-      if (error.response && error.response.data) {
-        setError(
-          typeof error.response.data === 'string'
-            ? error.response.data
-            : error.response.data.message || 'Login failed. Please check your credentials.'
-        )
-      } else {
-        setError(error.message || 'An unexpected error occurred. Please try again.')
-      }
-    } finally {
+    setTimeout(() => {
       setIsLoading(false)
-    }
+      if (onLoginSuccess) onLoginSuccess()
+    }, 2000)
   }
 
   const containerVariants = {
@@ -106,7 +43,7 @@ export default function LoginPage() {
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#10b981]/10 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#044a33]/30 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-size-[40px_40px] pointer-events-none mix-blend-overlay" />
+      <div className="absolute inset-0 bg-[linear-linear(to_right,#ffffff03_1px,transparent_1px),linear-linear(to_bottom,#ffffff03_1px,transparent_1px)] bg-size-[40px_40px] pointer-events-none mix-blend-overlay" />
 
       <motion.div
         variants={containerVariants}
@@ -135,11 +72,6 @@ export default function LoginPage() {
         >
           <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-[#10b981]/50 to-transparent opacity-50" />
 
-          {error && <ErrorBox type="error" message={error} onClose={() => setError(null)} />}
-          {success && (
-            <ErrorBox type="success" message={success} onClose={() => setSuccess(null)} />
-          )}
-
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-1">
               <label className="text-xs font-mono text-gray-200 uppercase tracking-wider ml-1">
@@ -150,10 +82,6 @@ export default function LoginPage() {
                   <Mail className="h-5 w-5 text-gray-300 group-focus-within:text-[#10b981] transition-colors" />
                 </div>
                 <input
-                  id="email"
-                  name="email"
-                  value={FormData.email}
-                  onChange={handleChange}
                   type="email"
                   required
                   placeholder="harsh@vitalstudios.com"
@@ -167,22 +95,18 @@ export default function LoginPage() {
                 <label className="text-xs font-mono text-gray-200 uppercase tracking-wider">
                   Secure Password
                 </label>
-                <Link
+                <a
                   href="#"
                   className="text-xs text-[#10b981] hover:text-emerald-400 transition-colors font-mono"
                 >
                   Forgot?
-                </Link>
+                </a>
               </div>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-300 group-focus-within:text-[#10b981] transition-colors" />
                 </div>
                 <input
-                  id="password"
-                  name="password"
-                  value={FormData.password}
-                  onChange={handleChange}
                   type={showPassword ? 'text' : 'password'}
                   required
                   placeholder="••••••••••••"
@@ -191,7 +115,7 @@ export default function LoginPage() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="cursor-pointer absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-[#10b981] transition-colors focus:outline-none"
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-[#10b981] transition-colors focus:outline-none cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -226,25 +150,22 @@ export default function LoginPage() {
           </div>
 
           <div className="w-full flex items-center justify-center">
-            <button
-              onClick={handleGoogleLogin}
-              className="cursor-pointer flex w-full items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#050505] border border-white/10 hover:bg-white/5 hover:border-white/20 transition-all text-sm font-medium text-gray-300"
-            >
+            <button className="cursor-pointer flex w-full items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#050505] border border-white/10 hover:bg-white/5 hover:border-white/20 transition-all text-sm font-medium text-gray-300">
               <FcGoogle className="w-5 h-5" />
-              Continue With Google
+              Google
             </button>
           </div>
         </motion.div>
 
         <motion.div variants={itemVariants} className="text-center mt-8">
           <p className="text-gray-400 text-sm">
-            Don't have an Account?{' '}
-            <Link
-              href="/signup"
-              className="text-[#10b981] font-semibold hover:text-emerald-400 transition-colors flex items-center justify-center gap-1 inline-flex"
+            Don't have an access key?{' '}
+            <button
+              onClick={() => window.open('http://localhost:3000/signup', '_blank')}
+              className="text-[#10b981] font-semibold hover:text-emerald-400 transition-colors flex items-center justify-center gap-1 cursor-pointer bg-transparent border-none p-0"
             >
-              Sign Up <Sparkles className="w-3 h-3" />
-            </Link>
+              Deploy Engine <Sparkles className="w-3 h-3" />
+            </button>
           </p>
         </motion.div>
       </motion.div>
