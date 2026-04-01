@@ -34,19 +34,17 @@ export default function SetupPage({ onSetupComplete }: SetupProps) {
     show: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } }
   }
 
-  const itemVariants : any = {
+  const itemVariants: any = {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
   }
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans flex items-center justify-center p-6 relative overflow-hidden selection:bg-[#10b981] selection:text-black">
-      {/* Background Ambient Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#10b981]/10 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#044a33]/30 blur-[120px] rounded-full pointer-events-none" />
 
-      {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none mix-blend-overlay" />
+      <div className="absolute inset-0 bg-[linear-linear(to_right,#ffffff03_1px,transparent_1px),linear-linear(to_bottom,#ffffff03_1px,transparent_1px)] bg-size-[40px_40px] pointer-events-none mix-blend-overlay" />
 
       <motion.div
         variants={containerVariants}
@@ -60,7 +58,7 @@ export default function SetupPage({ onSetupComplete }: SetupProps) {
           </div>
           <h1 className="text-3xl md:text-4xl font-black tracking-tighter mb-2">
             System{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10b981] to-emerald-200">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-[#10b981] to-emerald-200">
               Ignition
             </span>
           </h1>
@@ -71,9 +69,9 @@ export default function SetupPage({ onSetupComplete }: SetupProps) {
 
         <motion.div
           variants={itemVariants}
-          className="bg-[#0a0a0a] border border-white/10 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden"
+          className="bg-[#0a0a0a] border border-white/10 rounded-4xl p-8 shadow-2xl relative overflow-hidden"
         >
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#10b981]/50 to-transparent opacity-50" />
+          <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-[#10b981]/50 to-transparent opacity-50" />
 
           <div className="mb-6 p-4 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-start gap-3">
             <ShieldCheck className="w-5 h-5 text-blue-400 shrink-0 mt-0.5" />
@@ -84,10 +82,9 @@ export default function SetupPage({ onSetupComplete }: SetupProps) {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Groq Key Input */}
             <div className="space-y-1">
               <label className="text-xs font-mono text-gray-200 uppercase tracking-wider ml-1 flex justify-between">
-                <span>Groq LPU Key</span>
+                <span>Groq API Key</span>
                 <span className="text-gray-500">Required</span>
               </label>
               <div className="relative group">
@@ -112,10 +109,9 @@ export default function SetupPage({ onSetupComplete }: SetupProps) {
               </div>
             </div>
 
-            {/* Gemini Key Input */}
             <div className="space-y-1">
               <label className="text-xs font-mono text-gray-200 uppercase tracking-wider ml-1 flex justify-between">
-                <span>Gemini 1.5 Pro Key</span>
+                <span>Gemini API Key</span>
                 <span className="text-gray-500">Required</span>
               </label>
               <div className="relative group">
@@ -145,7 +141,7 @@ export default function SetupPage({ onSetupComplete }: SetupProps) {
               disabled={isLoading || !keys.groq || !keys.gemini}
               className="cursor-pointer w-full relative group overflow-hidden rounded-xl bg-[#10b981] text-black font-bold py-4 mt-4 transition-all hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+              <div className="absolute inset-0 w-full h-full bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
               <div className="flex items-center justify-center gap-2 relative z-10">
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />

@@ -2,24 +2,92 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Mail, Lock, ArrowRight, Cpu, Sparkles, Eye, EyeOff } from 'lucide-react'
 import { FcGoogle } from 'react-icons/fc'
+import { FormDataLogin } from '../types/form-type'
+import { useAuthStore } from '../store/auth-store'
+import ErrorBox from '@renderer/utils/ErrorBox'
+import AxiosInstance from '@renderer/config/AxiosInstance'
 
 interface LoginProps {
   onLoginSuccess?: () => void
-  onNavigate?: (view: 'signup') => void
 }
 
-export default function LoginPage({ onLoginSuccess, onNavigate }: LoginProps) {
+export default function LoginPage({ onLoginSuccess }: LoginProps) {
   const [isLoading, setIsLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [FormData, setFormData] = useState<FormDataLogin>({
+    email: '',
+    password: ''
+  })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const setAccessToken = useAuthStore.getState().setAccessToken
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    if (error) setError(null)
+    if (success) setSuccess(null)
+  }
+
+  const handleGoogleLogin = () => {
+    window.open(`${import.meta.env.VITE_BACKEND_KEY}/users/google`, '_blank')
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setError(null)
+    setSuccess(null)
+
+    if (!FormData.email || !FormData.password) {
+      setError('Please fill in all fields.')
+      return
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(FormData.email)) {
+      setError('Please enter a valid email address.')
+      return
+    }
+
+    if (FormData.password.length < 6) {
+      setError('Password must be at least 6 characters long.')
+      return
+    }
+
     setIsLoading(true)
-    // Simulate API call to your cloud backend
-    setTimeout(() => {
+
+    try {
+      const response = await AxiosInstance.post('/users/login', FormData)
+
+      if (response.status === 200) {
+        setSuccess('Login successful! Redirecting to System Ignition...')
+        setFormData({
+          email: '',
+          password: ''
+        })
+
+        const accessToken = response.data.accessToken
+        setAccessToken(accessToken)
+
+        setTimeout(() => {
+          if (onLoginSuccess) onLoginSuccess()
+        }, 1500)
+      }
+    } catch (error: any) {
+      console.log(error.response.data)
+      if (error.response && error.response.data) {
+        setError(
+          typeof error.response.data === 'string'
+            ? error.response.data
+            : error.response.data.message || 'Login failed. Please check your credentials.'
+        )
+      } else {
+        setError(error.message || 'An unexpected error occurred. Please try again.')
+      }
+    } finally {
       setIsLoading(false)
-      if (onLoginSuccess) onLoginSuccess()
-    }, 2000)
+    }
   }
 
   const containerVariants = {
@@ -41,12 +109,10 @@ export default function LoginPage({ onLoginSuccess, onNavigate }: LoginProps) {
 
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans flex items-center justify-center p-6 relative overflow-hidden selection:bg-[#10b981] selection:text-black">
-      {/* Background Ambient Glows */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-[#10b981]/10 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-[#044a33]/30 blur-[120px] rounded-full pointer-events-none" />
 
-      {/* Grid Pattern Overlay */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff03_1px,transparent_1px),linear-gradient(to_bottom,#ffffff03_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none mix-blend-overlay" />
+      <div className="absolute inset-0 bg-[linear-linear(to_right,#ffffff03_1px,transparent_1px),linear-linear(to_bottom,#ffffff03_1px,transparent_1px)] bg-size-[40px_40px] pointer-events-none mix-blend-overlay" />
 
       <motion.div
         variants={containerVariants}
@@ -54,14 +120,13 @@ export default function LoginPage({ onLoginSuccess, onNavigate }: LoginProps) {
         animate="show"
         className="w-full max-w-md relative z-10"
       >
-        {/* Header Section */}
         <motion.div variants={itemVariants} className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#10b981]/10 border border-[#10b981]/30 shadow-[0_0_20px_rgba(16,185,129,0.2)] mb-6">
             <Cpu className="w-8 h-8 text-[#10b981]" />
           </div>
           <h1 className="text-3xl md:text-4xl font-black tracking-tighter mb-2">
             Authenticate{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#10b981] to-emerald-200">
+            <span className="text-transparent bg-clip-text bg-linear-to-r from-[#10b981] to-emerald-200">
               IRIS
             </span>
           </h1>
@@ -70,16 +135,18 @@ export default function LoginPage({ onLoginSuccess, onNavigate }: LoginProps) {
           </p>
         </motion.div>
 
-        {/* Main Form Card */}
         <motion.div
           variants={itemVariants}
-          className="bg-[#0a0a0a] border border-white/10 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden"
+          className="bg-[#0a0a0a] border border-white/10 rounded-4xl p-8 shadow-2xl relative overflow-hidden"
         >
-          {/* Subtle top border glow */}
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-[#10b981]/50 to-transparent opacity-50" />
+          <div className="absolute top-0 left-0 w-full h-1 bg-linear-to-r from-transparent via-[#10b981]/50 to-transparent opacity-50" />
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email Input */}
+          {error && <ErrorBox type="error" message={error} onClose={() => setError(null)} />}
+          {success && (
+            <ErrorBox type="success" message={success} onClose={() => setSuccess(null)} />
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-5 mt-4">
             <div className="space-y-1">
               <label className="text-xs font-mono text-gray-200 uppercase tracking-wider ml-1">
                 Email Address
@@ -89,6 +156,10 @@ export default function LoginPage({ onLoginSuccess, onNavigate }: LoginProps) {
                   <Mail className="h-5 w-5 text-gray-300 group-focus-within:text-[#10b981] transition-colors" />
                 </div>
                 <input
+                  id="email"
+                  name="email"
+                  value={FormData.email}
+                  onChange={handleChange}
                   type="email"
                   required
                   placeholder="harsh@vitalstudios.com"
@@ -97,7 +168,6 @@ export default function LoginPage({ onLoginSuccess, onNavigate }: LoginProps) {
               </div>
             </div>
 
-            {/* Password Input */}
             <div className="space-y-1">
               <div className="flex items-center justify-between ml-1 pr-1">
                 <label className="text-xs font-mono text-gray-200 uppercase tracking-wider">
@@ -115,6 +185,10 @@ export default function LoginPage({ onLoginSuccess, onNavigate }: LoginProps) {
                   <Lock className="h-5 w-5 text-gray-300 group-focus-within:text-[#10b981] transition-colors" />
                 </div>
                 <input
+                  id="password"
+                  name="password"
+                  value={FormData.password}
+                  onChange={handleChange}
                   type={showPassword ? 'text' : 'password'}
                   required
                   placeholder="••••••••••••"
@@ -123,7 +197,7 @@ export default function LoginPage({ onLoginSuccess, onNavigate }: LoginProps) {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-[#10b981] transition-colors focus:outline-none cursor-pointer"
+                  className="cursor-pointer absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-[#10b981] transition-colors focus:outline-none"
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
@@ -135,7 +209,7 @@ export default function LoginPage({ onLoginSuccess, onNavigate }: LoginProps) {
               disabled={isLoading}
               className="cursor-pointer w-full relative group overflow-hidden rounded-xl bg-[#10b981] text-black font-bold py-4 mt-2 transition-all hover:shadow-[0_0_30px_rgba(16,185,129,0.3)] disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+              <div className="absolute inset-0 w-full h-full bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
               <div className="flex items-center justify-center gap-2 relative z-10">
                 {isLoading ? (
                   <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
@@ -158,9 +232,12 @@ export default function LoginPage({ onLoginSuccess, onNavigate }: LoginProps) {
           </div>
 
           <div className="w-full flex items-center justify-center">
-            <button className="cursor-pointer flex w-full items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#050505] border border-white/10 hover:bg-white/5 hover:border-white/20 transition-all text-sm font-medium text-gray-300">
+            <button
+              onClick={handleGoogleLogin}
+              className="cursor-pointer flex w-full items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#050505] border border-white/10 hover:bg-white/5 hover:border-white/20 transition-all text-sm font-medium text-gray-300"
+            >
               <FcGoogle className="w-5 h-5" />
-              Google
+              Continue With Google
             </button>
           </div>
         </motion.div>
@@ -169,8 +246,8 @@ export default function LoginPage({ onLoginSuccess, onNavigate }: LoginProps) {
           <p className="text-gray-400 text-sm">
             Don't have an access key?{' '}
             <button
-              onClick={() => onNavigate?.('signup')}
-              className="text-[#10b981] font-semibold hover:text-emerald-400 transition-colors flex items-center justify-center gap-1 inline-flex cursor-pointer bg-transparent border-none p-0"
+              onClick={() => window.open(`${import.meta.env.VITE_FRONTEND_KEY}/signup`, '_blank')}
+              className="text-[#10b981] font-semibold hover:text-emerald-400 transition-colors flex items-center justify-center gap-1 cursor-pointer bg-transparent border-none p-0"
             >
               Deploy Engine <Sparkles className="w-3 h-3" />
             </button>

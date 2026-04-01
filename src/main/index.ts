@@ -14,7 +14,6 @@ import fs from 'fs'
 import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import icon from '../../resources/icon.png?asset'
 
-// --- YOUR EXISTING IMPORTS ---
 import registerIpcHandlers from './logic/iris-memory-save'
 import registerSystemHandlers from './logic/get-system-info'
 import registerFileSearch from './logic/file-search'
@@ -51,8 +50,6 @@ import registerLockSystem from './security/lock-system'
 
 app.commandLine.appendSwitch('use-fake-ui-for-media-stream')
 
-// --- REGISTER DEEP LINK PROTOCOL ---
-// This allows Google OAuth to redirect to iris://
 if (process.defaultApp) {
   if (process.argv.length >= 2) {
     app.setAsDefaultProtocolClient('iris', process.execPath, [path.resolve(process.argv[1])])
@@ -61,7 +58,6 @@ if (process.defaultApp) {
   app.setAsDefaultProtocolClient('iris')
 }
 
-// Force Single Instance Lock for Deep Linking
 const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
   app.quit()
@@ -70,7 +66,6 @@ if (!gotTheLock) {
 let mainWindow: BrowserWindow | null = null
 let isOverlayMode = false
 
-// --- SECURE KEY STORAGE PATH ---
 const secureConfigPath = join(app.getPath('userData'), 'iris_secure_vault.json')
 
 function createWindow(): void {
@@ -114,12 +109,10 @@ function createWindow(): void {
   }
 }
 
-// --- HANDLE DEEP LINKS (WINDOWS/LINUX) ---
 app.on('second-instance', (event, commandLine) => {
   if (mainWindow) {
     if (mainWindow.isMinimized()) mainWindow.restore()
     mainWindow.focus()
-    // Extract the URL from command line
     const url = commandLine.pop()
     if (url && url.startsWith('iris://')) {
       mainWindow.webContents.send('oauth-callback', url)
@@ -158,7 +151,6 @@ function toggleOverlayMode() {
 app.whenReady().then(() => {
   electronApp.setAppUserModelId('com.electron')
 
-  // --- SECURE KEY IPC HANDLERS ---
   ipcMain.handle('secure-save-keys', async (_, { groqKey, geminiKey }) => {
     if (!safeStorage.isEncryptionAvailable()) {
       throw new Error('OS encryption not available on this system.')
@@ -188,7 +180,6 @@ app.whenReady().then(() => {
   ipcMain.handle('check-keys-exist', () => {
     return fs.existsSync(secureConfigPath)
   })
-  // --------------------------------
 
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const responseHeaders = { ...details.responseHeaders }
@@ -206,7 +197,6 @@ app.whenReady().then(() => {
     optimizer.watchWindowShortcuts(window)
   })
 
-  // --- HANDLE DEEP LINKS (MACOS) ---
   app.on('open-url', (event, url) => {
     event.preventDefault()
     if (mainWindow && url.startsWith('iris://')) {
@@ -214,7 +204,6 @@ app.whenReady().then(() => {
     }
   })
 
-  // --- YOUR REGISTRATIONS ---
   registerLockSystem()
   registerSecurityVault()
   registerPhantomKeyboard()
