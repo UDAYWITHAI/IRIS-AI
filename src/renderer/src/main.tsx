@@ -8,7 +8,6 @@ import LockScreen from './UI/LockScreen'
 import LoginPage from './auth/Login'
 import SetupPage from './auth/Setup'
 
-// Electron IPC Bridge Check
 const electronAPI = (window as any).electron?.ipcRenderer
 
 class SystemErrorBoundary extends React.Component<
