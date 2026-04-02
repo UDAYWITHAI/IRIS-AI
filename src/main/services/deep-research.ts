@@ -111,6 +111,7 @@ export default function registerDeepResearch({ ipcMain }: { ipcMain: IpcMain }) 
 
   ipcMain.handle('read-notion-reports', async (event, { notionKey, notionDbId }) => {
     if (!event) {
+      console.error('No event object provided in read-notion-reports handler.')
     }
     try {
       if (!notionKey || !notionDbId) {
