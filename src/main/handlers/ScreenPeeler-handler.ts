@@ -368,7 +368,7 @@ export default function registerScreenPeeler() {
       let detectedLanguage = 'javascript'
 
       try {
-        // 1. DYNAMICALLY READ FROM THE OS VAULT
+       
         let apiKey = ''
         const secureConfigPath = path.join(app.getPath('userData'), 'iris_secure_vault.json')
 
