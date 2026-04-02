@@ -18,7 +18,7 @@ import { FaMemory } from 'react-icons/fa6'
 import { GiTinker } from 'react-icons/gi'
 import { HiComputerDesktop } from 'react-icons/hi2'
 import * as faceapi from 'face-api.js'
-import { VisionMode } from '../IndexRoot'
+import { VisionMode } from '@renderer/IndexRoot'
 
 interface IrisProps {
   isSystemActive: boolean
