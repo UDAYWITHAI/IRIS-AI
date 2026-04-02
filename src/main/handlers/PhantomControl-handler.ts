@@ -195,6 +195,9 @@ export default function registerPhantomKeyboard() {
   })
 
   ipcMain.on('phantom-resize', (event, height) => {
+    if (!event) {
+      console.warn('Received phantom-resize event without event object.')
+    }
     if (phantomWindow) {
       const bounds = phantomWindow.getBounds()
       phantomWindow.setBounds({ width: bounds.width, height: height, x: bounds.x, y: bounds.y })
