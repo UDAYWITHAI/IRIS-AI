@@ -1,6 +1,5 @@
 export const ingestCodebase = async (dirPath: string): Promise<string> => {
   try {
-    // 1. EXTRACT GEMINI KEY FOR EMBEDDING GENERATION
     const geminiKey = localStorage.getItem('iris_custom_api_key') || ''
 
     if (!geminiKey.trim()) {
@@ -17,7 +16,6 @@ export const ingestCodebase = async (dirPath: string): Promise<string> => {
       }
     )
 
-    // 2. PASS PATH AND KEY ACROSS THE BRIDGE
     const result = await window.electron.ipcRenderer.invoke('ingest-codebase', {
       dirPath,
       geminiKey
@@ -42,7 +40,6 @@ export const ingestCodebase = async (dirPath: string): Promise<string> => {
 
 export const consultOracle = async (query: string): Promise<string> => {
   try {
-    // 3. EXTRACT BOTH KEYS FOR QUERY EMBEDDING AND LLM INFERENCING
     const geminiKey = localStorage.getItem('iris_custom_api_key') || ''
     const groqKey = localStorage.getItem('iris_groq_api_key') || ''
 
@@ -54,7 +51,6 @@ export const consultOracle = async (query: string): Promise<string> => {
 
     window.dispatchEvent(new CustomEvent('oracle-thinking'))
 
-    // 4. DISPATCH THE FULL PAYLOAD
     const result = await window.electron.ipcRenderer.invoke('consult-oracle', {
       query,
       geminiKey,
