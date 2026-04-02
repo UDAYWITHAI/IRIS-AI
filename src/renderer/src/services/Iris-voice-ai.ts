@@ -1219,7 +1219,22 @@ ${JSON.stringify(history)}
           outputAudioTranscription: {}
         }
       }
+
       this.socket?.send(JSON.stringify(setupMsg))
+
+      const wakeMsg = {
+        clientContent: {
+          turns: [
+            {
+              role: 'user',
+              parts: [{ text: 'System uplink established. Give me a brief, 1-sentence greeting.' }]
+            }
+          ],
+          turnComplete: true
+        }
+      }
+      this.socket?.send(JSON.stringify(wakeMsg))
+
       this.startMicrophone()
       this.startAppWatcher()
     }
