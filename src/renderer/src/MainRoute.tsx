@@ -59,7 +59,7 @@ const MainRoute = () => {
         setIsSystemActive(true)
         setIsMicMuted(false)
       } catch (err) {
-        console.error(err)
+        alert(err instanceof Error ? err.message : 'Connection failed')
         setIsSystemActive(false)
       }
     } else {
