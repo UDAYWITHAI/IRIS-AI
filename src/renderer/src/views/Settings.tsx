@@ -91,7 +91,6 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
     alert('User Designation Saved.')
   }
 
-  // --- UPDATED API KEY SAVER ---
   const saveApiKeys = async () => {
     localStorage.setItem('iris_custom_api_key', geminiKey)
     localStorage.setItem('iris_groq_api_key', groqKey)
@@ -99,7 +98,6 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
     localStorage.setItem('iris_notion_api_key', notionKey)
     localStorage.setItem('iris_tailvy_api_key', tailvyKey)
 
-    // Fire it to the OS-level SafeStorage Vault
     if (window.electron?.ipcRenderer) {
       try {
         await window.electron.ipcRenderer.invoke('secure-save-keys', {
