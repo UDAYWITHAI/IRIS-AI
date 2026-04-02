@@ -4,12 +4,12 @@ import React, { JSX, StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 
-import MainRoute from '.'
 import LockScreen from './UI/LockScreen'
 import LoginPage from './auth/Login'
 import { useAuthStore } from './store/auth-store'
 import AxiosInstance from './config/AxiosInstance'
 import AuthInitializer from './auth/AuthToken'
+import IndexRoot from '.'
 
 const electronAPI = (window as any).electron?.ipcRenderer
 
@@ -150,7 +150,7 @@ const AppRouter = () => {
         path="/"
         element={
           <ProtectedRoute>
-            <MainRoute />
+            <IndexRoot />
           </ProtectedRoute>
         }
       />
