@@ -170,7 +170,6 @@ export default function registerFileSearch(ipcMain: IpcMain) {
     }
   })
 
-  // 1. EXTRACT groqKey FROM THE IPC PAYLOAD INSTEAD OF .ENV
   ipcMain.handle('search-files', async (event, { query, groqKey }) => {
     try {
       event.sender.send('semantic-progress', {
@@ -179,7 +178,6 @@ export default function registerFileSearch(ipcMain: IpcMain) {
         progress: 10
       })
 
-      // 2. STRICT ERROR CHECKING FOR THE PASSED KEY
       if (!groqKey || groqKey.trim() === '') {
         throw new Error('Missing Groq API Key. Please configure it in the Command Center Vault.')
       }
