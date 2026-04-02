@@ -1,9 +1,9 @@
-import MainRoute from './MainRoute'
+import IndexRoot from "./IndexRoot"
 
 const App = () => {
   return (
     <>
-      <MainRoute />
+      <IndexRoot />
     </>
   )
 }

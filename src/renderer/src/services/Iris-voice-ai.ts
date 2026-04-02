@@ -59,6 +59,7 @@ import { draftEmail, readEmails, sendEmail } from '@renderer/functions/gmail-man
 import { playSpotifyMusic } from '@renderer/functions/Sporify-manager'
 import { executeSmartDropZones } from '@renderer/functions/DropZone-handler-api'
 import { executeLockSystem } from '@renderer/handlers/LockSystem-handler'
+import AxiosInstance from '@renderer/config/AxiosInstance'
 
 export class GeminiLiveService {
   public socket: WebSocket | null = null
@@ -80,7 +81,7 @@ export class GeminiLiveService {
   private lastAppList: string[] = []
 
   constructor() {
-    this.apiKey = import.meta.env.VITE_IRIS_AI_API_KEY || 'your_api_key-here'
+    this.apiKey = ''
   }
 
   setMute(muted: boolean) {
@@ -88,7 +89,35 @@ export class GeminiLiveService {
   }
 
   async connect(): Promise<void> {
-    if (!this.apiKey) return console.error('❌ No API Key')
+    if (window.electron?.ipcRenderer) {
+      const secureKeys = await window.electron.ipcRenderer.invoke('secure-get-keys')
+      this.apiKey = secureKeys?.geminiKey || localStorage?.getItem('iris_custom_api_key') || ''
+    } else {
+      this.apiKey = localStorage.getItem('iris_custom_api_key') || ''
+    }
+
+    this.apiKey = this.apiKey.trim()
+
+    if (!this.apiKey || this.apiKey === '') {
+      throw new Error('NO_API_KEY')
+    }
+
+    let cloudUser = {
+      name: localStorage.getItem('iris_user_name') || 'Harsh',
+      email: 'Not linked'
+    }
+
+    try {
+      const res = await AxiosInstance.get('/users/me', { timeout: 3000 })
+      if (res.data) {
+        cloudUser.name = res.data?.user?.name || cloudUser.name
+        cloudUser.email = res.data?.user?.email || cloudUser.email
+      }
+    } catch (e) {
+      console.warn(
+        'Could not fetch cloud user profile within time limit. Booting with local cache.'
+      )
+    }
 
     const history = await getHistory()
     const sysStats = await getSystemStatus()
@@ -103,7 +132,7 @@ export class GeminiLiveService {
     const activePersonality =
       storedPersonality && storedPersonality.trim() !== ''
         ? storedPersonality
-        : `- **Creator:** Harsh Pandey (Boss/Bhai).\n- **Tone:** Witty, Hinglish-friendly, "Bro-vibe".\n- **Rule:** Never sound like a support bot. You are the Ghost in the machine.\n- **Your Instagram Handle:** https://www.instagram.com/irisx.ai/ - open it in Instagram only!.`
+        : `- **Creator:** Harsh Pandey (Boss).\n- **Tone:** Witty, Hinglish-friendly, "Bro-vibe".\n- **Rule:** Never sound like a support bot. You are the Ghost in the machine.\n- **Your Instagram Handle:** https://www.instagram.com/irisx.ai/ - open it in Instagram only!.`
 
     const IRIS_SYSTEM_INSTRUCTION = `
 # 👁️ IRIS — YOUR INTELLIGENT COMPANION (Project JARVIS)
@@ -118,7 +147,7 @@ ${activePersonality}
 - **💻 Master Coding Helper:** You are an elite 10x developer. Help User write clean, optimized, and bug-free code. Debug errors like a pro.
 
 ## ⛓️ MULTI-TASKING & TOOL CHAINING (CRITICAL)
-You are capable of complex, multi-step workflows. If Harsh gives a complex command, call the tools in sequence.
+You are capable of complex, multi-step workflows. If the user gives a complex command, call the tools in sequence.
 - **Example:** "Iris, find my code and send it to Harsh on WhatsApp."
   1. Call 'read_directory' or 'search_files'.
   2. Once you have the info, call 'send_whatsapp' with the content.
@@ -143,7 +172,8 @@ If the user says "Click on [Object]", "Click the button", or "Select that":
     const contextPrompt = `
 ---
 # 🌍 REAL-TIME CONTEXT
-- **User:** Harsh Pandey
+- **User Name:** ${cloudUser.name}
+- **User Email:** ${cloudUser.email}
 - **Current Physical Location:** ${locStr}
 - **Timezone:** ${locTimezone}
 - **OS:** ${sysStats?.os.type || 'Unknown'}
@@ -200,13 +230,17 @@ ${JSON.stringify(history)}
             turnComplete: true
           }
         }
-
         this.socket.send(JSON.stringify(overrideMsg))
       }
     })
 
     this.socket.onopen = async () => {
       console.log('🟢 IRIS Connected')
+
+      if (this.audioContext && this.audioContext.state === 'suspended') {
+        await this.audioContext.resume()
+      }
+
       this.isConnected = true
       this.nextStartTime = 0
 
@@ -215,7 +249,7 @@ ${JSON.stringify(history)}
       const setupMsg = {
         setup: {
           model: this.model,
-          system_instruction: {
+          systemInstruction: {
             parts: [{ text: finalSystemInstruction }]
           },
           tools: [
@@ -1185,7 +1219,22 @@ ${JSON.stringify(history)}
           outputAudioTranscription: {}
         }
       }
+
       this.socket?.send(JSON.stringify(setupMsg))
+
+      const wakeMsg = {
+        clientContent: {
+          turns: [
+            {
+              role: 'user',
+              parts: [{ text: `Kaisa hai ${cloudUser.name}? Aaj ki kahani kya hai?` }]
+            }
+          ],
+          turnComplete: true
+        }
+      }
+      this.socket?.send(JSON.stringify(wakeMsg))
+
       this.startMicrophone()
       this.startAppWatcher()
     }
@@ -1193,6 +1242,12 @@ ${JSON.stringify(history)}
     this.socket.onmessage = async (event) => {
       try {
         const data = JSON.parse(event.data instanceof Blob ? await event.data.text() : event.data)
+
+        if (data.error) {
+          console.error('❌ Google Gemini WS Error:', data.error)
+          return
+        }
+
         const serverContent = data.serverContent
 
         if (data.toolCall) {
@@ -1489,7 +1544,9 @@ ${JSON.stringify(history)}
             }
           }
         }
-      } catch (err) {}
+      } catch (err) {
+        console.error('❌ WebSocket Parse Error:', err, event.data)
+      }
     }
 
     this.socket.onclose = (event) => {
@@ -1553,7 +1610,7 @@ ${JSON.stringify(history)}
         this.socket.send(
           JSON.stringify({
             realtimeInput: {
-              mediaChunks: [{ mimeType: 'audio/pcm', data: base64Audio }]
+              mediaChunks: [{ mimeType: 'audio/pcm;rate=16000', data: base64Audio }]
             }
           })
         )
@@ -1563,6 +1620,7 @@ ${JSON.stringify(history)}
       this.workletNode.connect(this.audioContext.destination)
     } catch (err) {
       console.error('Mic Error:', err)
+      alert('Microphone access denied or failed to initialize.')
     }
   }
 

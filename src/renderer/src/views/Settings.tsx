@@ -34,7 +34,7 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
     (localStorage.getItem('iris_voice_profile') as 'MALE' | 'FEMALE') || 'MALE'
   )
   const [personality, setPersonality] = useState('')
-  const [userName, setUserName] = useState(localStorage.getItem('iris_user_name') || 'Harsh Pandey')
+  const [userName, setUserName] = useState(localStorage.getItem('iris_user_name') || '')
 
   const [geminiKey, setGeminiKey] = useState(localStorage.getItem('iris_custom_api_key') || '')
   const [groqKey, setGroqKey] = useState(localStorage.getItem('iris_groq_api_key') || '')
@@ -54,12 +54,14 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
-    window.electron.ipcRenderer.invoke('get-personality').then((res) => {
-      if (res) setPersonality(res)
-    })
-    window.electron.ipcRenderer
-      .invoke('check-vault-status')
-      .then((res) => setFaceCount(res.faceCount || 0))
+    if (window.electron?.ipcRenderer) {
+      window.electron.ipcRenderer.invoke('get-personality').then((res) => {
+        if (res) setPersonality(res)
+      })
+      window.electron.ipcRenderer
+        .invoke('check-vault-status')
+        .then((res) => setFaceCount(res?.faceCount || 0))
+    }
   }, [])
 
   const handleVoiceChange = (v: 'MALE' | 'FEMALE') => {
@@ -78,8 +80,10 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
   }
 
   const savePersonality = async () => {
-    await window.electron.ipcRenderer.invoke('set-personality', personality)
-    alert('Personality Matrix Saved Securely to OS.')
+    if (window.electron?.ipcRenderer) {
+      await window.electron.ipcRenderer.invoke('set-personality', personality)
+      alert('Personality Matrix Saved Securely to OS.')
+    }
   }
 
   const saveUserName = () => {
@@ -87,13 +91,27 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
     alert('User Designation Saved.')
   }
 
-  const saveApiKeys = () => {
+  const saveApiKeys = async () => {
     localStorage.setItem('iris_custom_api_key', geminiKey)
     localStorage.setItem('iris_groq_api_key', groqKey)
     localStorage.setItem('iris_hf_api_key', hfKey)
     localStorage.setItem('iris_notion_api_key', notionKey)
     localStorage.setItem('iris_tailvy_api_key', tailvyKey)
-    alert('All Neural Uplinks (API Keys) secured locally. Restart AI modules to apply.')
+
+    if (window.electron?.ipcRenderer) {
+      try {
+        await window.electron.ipcRenderer.invoke('secure-save-keys', {
+          groqKey,
+          geminiKey
+        })
+      } catch (e) {
+        console.error('Vault save failed, but local storage is set.', e)
+      }
+    }
+
+    alert(
+      'All Neural Uplinks (API Keys) secured locally and in OS Vault. Restart AI modules to apply.'
+    )
   }
 
   const currentWordCount = personality
@@ -102,6 +120,7 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
     .filter((w) => w.length > 0).length
 
   const unlockSecurityModule = async () => {
+    if (!window.electron?.ipcRenderer) return
     const isValid = await window.electron.ipcRenderer.invoke('verify-vault-pin', authPin)
     if (isValid) {
       setIsSecurityUnlocked(true)
@@ -113,7 +132,7 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
   }
 
   const updateMasterPin = async () => {
-    if (newPin.length !== 4) return
+    if (newPin.length !== 4 || !window.electron?.ipcRenderer) return
     await window.electron.ipcRenderer.invoke('setup-vault-pin', newPin)
     setNewPin('')
     alert('Master PIN Updated Successfully.')
@@ -146,7 +165,9 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
             setEnrollStatus('FACE ACQUIRED. ENCRYPTING...')
             const descriptorArray = Array.from(detection.descriptor)
 
-            await window.electron.ipcRenderer.invoke('setup-vault-face', descriptorArray)
+            if (window.electron?.ipcRenderer) {
+              await window.electron.ipcRenderer.invoke('setup-vault-face', descriptorArray)
+            }
 
             stream.getTracks().forEach((t) => t.stop())
             setIsScanningFace(false)
@@ -341,7 +362,7 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
                     </span>
                     <button
                       onClick={saveApiKeys}
-                      className="bg-white text-black px-6 py-2.5 rounded-lg text-xs font-bold tracking-widest hover:bg-zinc-200 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.1)] flex items-center justify-center gap-2"
+                      className="bg-white text-black px-6 py-2.5 rounded-lg text-xs font-bold tracking-widest hover:bg-zinc-200 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.1)] flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <RiSave3Line size={16} /> SAVE ALL KEYS
                     </button>
@@ -357,7 +378,7 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
                           type="password"
                           value={geminiKey}
                           onChange={(e) => setGeminiKey(e.target.value)}
-                          placeholder="AI_..."
+                          placeholder="AIzaSy_..."
                           className="bg-transparent border-none outline-none text-sm font-mono text-zinc-100 w-full placeholder:text-zinc-700"
                         />
                       </div>
@@ -471,7 +492,7 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
                         />
                         <button
                           onClick={unlockSecurityModule}
-                          className="h-full px-8 bg-white text-black text-xs font-bold tracking-widest rounded-lg hover:bg-zinc-200 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+                          className="h-full px-8 bg-white text-black text-xs font-bold tracking-widest rounded-lg hover:bg-zinc-200 transition-colors shadow-[0_0_15px_rgba(255,255,255,0.2)] cursor-pointer"
                         >
                           UNLOCK
                         </button>
@@ -497,7 +518,7 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
                       />
                       <button
                         onClick={updateMasterPin}
-                        className="text-zinc-500 hover:text-white transition-colors ml-2"
+                        className="text-zinc-500 hover:text-white transition-colors ml-2 cursor-pointer"
                       >
                         <RiSave3Line size={20} />
                       </button>
@@ -538,7 +559,7 @@ const SettingsView = ({ isSystemActive }: SettingsProps) => {
                         </p>
                         <button
                           onClick={startFaceEnrollment}
-                          className="w-full py-3 rounded-lg bg-white text-black font-bold tracking-widest text-[12px] flex items-center justify-center gap-2 hover:bg-zinc-200 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] mt-auto"
+                          className="w-full py-3 rounded-lg bg-white text-black font-bold tracking-widest text-[12px] flex items-center justify-center gap-2 hover:bg-zinc-200 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)] mt-auto cursor-pointer"
                         >
                           <RiAddLine size={18} /> ENROLL NEW IDENTITY
                         </button>

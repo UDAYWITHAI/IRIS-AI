@@ -9,12 +9,9 @@ out
 
 .env
 .env.*
+!.env.example
 
 .idea/
 
-.vscode/*
-!.vscode/extensions.json
-
 credentials.json
 gmail_token.json
-.env

@@ -55,31 +55,21 @@ const cosineSimilarity = (vecA: number[], vecB: number[]) => {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-const getGeminiClient = () => {
-  const apiKey =
-    (process.env as any).MAIN_VITE_GEMINI_API_KEY || (import.meta.env as any).VITE_GEMINI_API_KEY
-  if (!apiKey) throw new Error('Gemini Custom API Key is missing.')
-  return new GoogleGenAI({ apiKey })
-}
-
-const getGroqClient = () => {
-  const apiKey =
-    (import.meta.env as any).MAIN_VITE_GROQ_API_KEY || (process.env as any).VITE_GROQ_API_KEY
-  if (!apiKey) throw new Error('Groq Custom API Key is missing.')
-  return new Groq({ apiKey })
-}
-
 export default function registerOracle({ ipcMain }: { ipcMain: IpcMain }) {
   ipcMain.handle('cancel-ingestion', () => {
     isCancelled = true
     return { success: true }
   })
 
-  ipcMain.handle('ingest-codebase', async (event, dirPath: string) => {
+  ipcMain.handle('ingest-codebase', async (event, { dirPath, geminiKey }) => {
     try {
+      if (!geminiKey) {
+        throw new Error('Missing Gemini API Key. Please configure it in the Command Center Vault.')
+      }
+
       const targetPath = path.normalize(dirPath.trim())
       isCancelled = false
-      const ai = getGeminiClient()
+      const ai = new GoogleGenAI({ apiKey: geminiKey })
 
       const prevState = await loadState(targetPath)
       if (prevState) {
@@ -211,12 +201,17 @@ export default function registerOracle({ ipcMain }: { ipcMain: IpcMain }) {
     }
   })
 
-  ipcMain.handle('consult-oracle', async (_event, query: string) => {
+  ipcMain.handle('consult-oracle', async (_event, { query, geminiKey, groqKey }) => {
     try {
       if (vectorDB.length === 0)
         return { success: false, answer: 'Error: No files loaded into memory.' }
-      const ai = getGeminiClient()
-      const groq = getGroqClient()
+
+      if (!geminiKey || !groqKey) {
+        throw new Error('Missing API Keys. Ensure both Gemini and Groq are configured in Settings.')
+      }
+
+      const ai = new GoogleGenAI({ apiKey: geminiKey })
+      const groq = new Groq({ apiKey: groqKey })
 
       const queryResponse: any = await ai.models.embedContent({
         model: 'gemini-embedding-001',

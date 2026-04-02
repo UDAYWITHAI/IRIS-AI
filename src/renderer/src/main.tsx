@@ -4,12 +4,12 @@ import React, { JSX, StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { HashRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 
-import MainRoute from './MainRoute'
 import LockScreen from './UI/LockScreen'
 import LoginPage from './auth/Login'
 import { useAuthStore } from './store/auth-store'
 import AxiosInstance from './config/AxiosInstance'
 import AuthInitializer from './auth/AuthToken'
+import IndexRoot from './IndexRoot'
 
 const electronAPI = (window as any).electron?.ipcRenderer
 
@@ -59,6 +59,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
 
         const userRes = await AxiosInstance.get('/users/me')
         if (userRes.status !== 200) throw new Error('Cloud Auth Failed')
+          
 
 
         if (!isSessionUnlocked && location.pathname !== '/lock') {
@@ -150,7 +151,7 @@ const AppRouter = () => {
         path="/"
         element={
           <ProtectedRoute>
-            <MainRoute />
+            <IndexRoot />
           </ProtectedRoute>
         }
       />

@@ -170,7 +170,7 @@ export default function registerFileSearch(ipcMain: IpcMain) {
     }
   })
 
-  ipcMain.handle('search-files', async (event, { query }) => {
+  ipcMain.handle('search-files', async (event, { query, groqKey }) => {
     try {
       event.sender.send('semantic-progress', {
         status: 'searching',
@@ -178,10 +178,9 @@ export default function registerFileSearch(ipcMain: IpcMain) {
         progress: 10
       })
 
-      const groqKey =
-        (import.meta.env as any).MAIN_VITE_GROQ_API_KEY ||
-        (process.env as any).MAIN_VITE_GROQ_API_KEY
-      if (!groqKey) throw new Error('Missing MAIN_VITE_GROQ_API_KEY')
+      if (!groqKey || groqKey.trim() === '') {
+        throw new Error('Missing Groq API Key. Please configure it in the Command Center Vault.')
+      }
 
       let semanticResultsText = ''
       let nativeResultsText = ''
@@ -210,6 +209,7 @@ export default function registerFileSearch(ipcMain: IpcMain) {
       }
 
       const runNativeCrawler = async () => {
+        // 3. INITIALIZE GROQ WITH THE KEY PASSED FROM LOCALSTORAGE
         const groq = new Groq({ apiKey: groqKey })
 
         const prompt = `
