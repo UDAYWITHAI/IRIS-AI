@@ -189,7 +189,6 @@ export default function registerPhantomKeyboard() {
       const apiKey = (import.meta.env as any).VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY
       if (!apiKey) throw new Error('API key missing.')
 
-      // We use alt=sse for Server-Sent Events (much safer parsing)
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:streamGenerateContent?alt=sse&key=${apiKey}`,
         {
