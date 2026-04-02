@@ -1230,7 +1230,6 @@ ${JSON.stringify(history)}
       try {
         const data = JSON.parse(event.data instanceof Blob ? await event.data.text() : event.data)
 
-        // 4. UN-MUTE GOOGLE CLOUD ERRORS
         if (data.error) {
           console.error('❌ Google Gemini WS Error:', data.error)
           return
