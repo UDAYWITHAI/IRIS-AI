@@ -9,10 +9,9 @@ import {
   RiAddLine,
   RiSave3Line,
   RiCloseLine,
-  RiEditLine // ⚡ Imported Edit Icon
+  RiEditLine 
 } from 'react-icons/ri'
 
-// Type Definition
 interface Note {
   filename: string
   title: string
@@ -20,7 +19,6 @@ interface Note {
   createdAt: Date
 }
 
-// 🎨 Helper Component for Code Blocks in Markdown
 const MarkdownComponents = {
   code({ node, inline, className, children, ...props }: any) {
     return !inline ? (
