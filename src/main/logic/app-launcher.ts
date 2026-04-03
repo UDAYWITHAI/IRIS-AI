@@ -2,15 +2,15 @@ import { IpcMain } from 'electron'
 import { exec } from 'child_process'
 
 const PROTECTED_PROCESSES = [
-  'explorer.exe', 
-  'dwm.exe', 
-  'svchost.exe', 
+  'explorer.exe',
+  'dwm.exe',
+  'svchost.exe',
   'lsass.exe',
   'csrss.exe',
-  'wininit.exe', 
-  'winlogon.exe', 
-  'services.exe', 
-  'taskmgr.exe', 
+  'wininit.exe',
+  'winlogon.exe',
+  'services.exe',
+  'taskmgr.exe',
   'system',
   'registry'
 ]
@@ -86,7 +86,6 @@ const PROCESS_NAMES: Record<string, string> = {
 }
 
 export default function registerAppLauncher(ipcMain: IpcMain) {
-
   ipcMain.removeHandler('open-app')
   ipcMain.handle('open-app', async (_event, appName: string) => {
     return new Promise((resolve) => {
@@ -145,7 +144,14 @@ function executeCommand(command: string, appName: string, resolve: any) {
 function launchViaPowerShell(appName: string, resolve: any) {
   const psCommand = `powershell -Command "Get-StartApps | Where-Object { $_.Name -like '*${appName}*' } | Select-Object -First 1 -ExpandProperty AppID"`
 
-  exec(psCommand, (err, stdout) => {
+  exec(psCommand, (error, stdout) => {
+    if (error) {
+      resolve({
+        success: false,
+        error: `Could not find '${appName}' on this system. Try opening it manually once.`
+      })
+      return
+    }
 
     const appId = stdout.trim()
 
