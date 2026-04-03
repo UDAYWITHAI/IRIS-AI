@@ -1,6 +1,5 @@
 export const playSpotifyMusic = async (songName: string) => {
   try {
-    console.log(`🎵 Booting up Spotify for: ${songName}`)
 
     await window.electron.ipcRenderer.invoke('open-app', 'spotify')
 
@@ -28,7 +27,6 @@ export const playSpotifyMusic = async (songName: string) => {
 
     return `✅ Now playing ${songName} on Spotify.`
   } catch (error) {
-    console.error(error)
     return `❌ Failed to play ${songName}.`
   }
 }
