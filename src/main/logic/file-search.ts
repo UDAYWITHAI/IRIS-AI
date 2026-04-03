@@ -209,7 +209,6 @@ export default function registerFileSearch(ipcMain: IpcMain) {
       }
 
       const runNativeCrawler = async () => {
-        // 3. INITIALIZE GROQ WITH THE KEY PASSED FROM LOCALSTORAGE
         const groq = new Groq({ apiKey: groqKey })
 
         const prompt = `
