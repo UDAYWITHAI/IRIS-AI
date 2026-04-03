@@ -29,7 +29,7 @@ export default function TerminalOverlay() {
           selectionBackground: 'rgba(0, 255, 65, 0.3)',
           black: '#050505',
           green: '#00ff41',
-          red: '#ff003c', // Cyberpunk Red errors
+          red: '#ff003c',
           cyan: '#00e5ff'
         },
         fontFamily: '"Fira Code", "Cascadia Code", Consolas, monospace',

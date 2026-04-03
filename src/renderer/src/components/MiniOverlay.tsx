@@ -9,7 +9,7 @@ import {
 } from 'react-icons/ri'
 import { GiPowerButton } from 'react-icons/gi'
 import { irisService } from '@renderer/services/Iris-voice-ai'
-import { VisionMode } from '../App'
+import { VisionMode } from '@renderer/IndexRoot'
 
 interface OverlayProps {
   isSystemActive: boolean
