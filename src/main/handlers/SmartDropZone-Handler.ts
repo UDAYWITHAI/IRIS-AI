@@ -49,7 +49,6 @@ export default function registerDropZoneControl(ipcMain: IpcMain) {
 
       return true
     } catch (e) {
-      console.error('Drag failed:', e)
       return false
     }
   })
@@ -64,7 +63,6 @@ export default function registerDropZoneControl(ipcMain: IpcMain) {
       await fs.rename(sourcePath, destPath)
       return { success: true, destPath }
     } catch (e: any) {
-      console.error('File move failed:', e)
       return { success: false, error: e.message }
     }
   })
