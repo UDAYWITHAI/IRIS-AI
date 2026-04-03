@@ -17,7 +17,6 @@ export default function TerminalOverlay() {
     const initTimer = setTimeout(() => {
       if (!containerRef.current) return
 
-      console.log('⚡ Terminal Engine Starting...')
 
       const term = new Terminal({
         cursorBlink: true,

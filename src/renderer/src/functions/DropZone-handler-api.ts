@@ -3,7 +3,6 @@ export const executeSmartDropZones = async (
   files: Array<{ file_path: string; category: string }>
 ) => {
   try {
-    console.log(`⚡ Igniting Fast Sort in: ${base_directory}`)
 
     window.dispatchEvent(
       new CustomEvent('dropzone-start', { detail: { total: files.length, path: base_directory } })
@@ -37,7 +36,6 @@ export const executeSmartDropZones = async (
     window.dispatchEvent(new CustomEvent('dropzone-done'))
     return `✅ Instant sort complete. ${files.length} files routed.`
   } catch (error) {
-    console.error(error)
     window.dispatchEvent(new CustomEvent('dropzone-done', { detail: { error: true } }))
     return '❌ Smart Drop Zones failed.'
   }
