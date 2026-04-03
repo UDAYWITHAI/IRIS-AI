@@ -234,7 +234,6 @@ export default function registerRealityHacker(ipcMain: IpcMain) {
 
       return { success: true }
     } catch (error: any) {
-      console.error('Hacker Protocol Failed:', error)
       return { success: false, error: error.message }
     }
   })
