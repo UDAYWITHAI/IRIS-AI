@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: iris-ai
+appId: com.harshpandey.iris
+productName: IRIS AI
 directories:
   buildResources: build
 files:
@@ -11,13 +11,35 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/**
+
+# --- WINDOWS CONFIGURATION ---
 win:
   executableName: iris-ai
+  target:
+    - target: nsis # Generates the professional Setup Wizard (.exe)
+    - target: msi # Generates the MSI installer (.msi)
+
+# --- THE MULTI-STEP WIZARD (NSIS) ---
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
+
+  # The Magic Flags for a Multi-Step Wizard:
+  oneClick: false # Disables the silent auto-install
+  allowToChangeInstallationDirectory: true # Step: Choose Save Location
+  createDesktopShortcut: always # Step: Create Desktop Icon
+  createStartMenuShortcut: true # Step: Add to Start Menu
+  runAfterFinish: true # Step: Launch after closing installer
+
+# --- MSI SPECIFIC CONFIG ---
+msi:
+  oneClick: false
+  runAfterFinish: true
+  shortcutName: ${productName}
   createDesktopShortcut: always
+
+# --- MAC CONFIGURATION ---
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
@@ -28,18 +50,19 @@ mac:
   notarize: false
 dmg:
   artifactName: ${name}-${version}.${ext}
+
+# --- LINUX CONFIGURATION ---
 linux:
   target:
     - AppImage
     - snap
     - deb
-  maintainer: electronjs.org
+  maintainer: Harsh Pandey
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
+
 npmRebuild: false
 publish:
   provider: generic
   url: https://example.com/auto-updates
-
-
