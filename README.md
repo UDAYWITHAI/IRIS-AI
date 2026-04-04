@@ -221,6 +221,14 @@ IRIS is forged using a high-performance stack combining web technologies with de
 
 ---
 
+# 💻 System Requirements
+
+- **OS:** Windows 10 / 11 (Native execution).
+- **Memory:** Minimum 4GB RAM (8GB recommended for heavy RAG indexing).
+- **Storage:** ~3.2 GB for the application, plus extra space for local LanceDB vector storage.
+
+---
+
 # 🚀 Installation & Setup
 
 ### 1. Clone Repo
