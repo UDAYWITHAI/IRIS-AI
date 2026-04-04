@@ -1,0 +1,34 @@
+name: Build and Release IRIS AI
+
+on:
+  push:
+    tags:
+      - 'v*' # This workflow ONLY triggers when you push a tag like 'v1.0.0'
+  workflow_dispatch: # Adds a button in GitHub to trigger it manually if needed
+
+permissions:
+  contents: write # Crucial: Allows the action to upload files to GitHub Releases
+
+jobs:
+  build-windows:
+    name: Build Windows Release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Compile and Publish
+        # The '-- -p always' flag tells electron-builder to push the .exe to GitHub Releases
+        run: npm run build:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
